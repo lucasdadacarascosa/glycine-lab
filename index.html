@@ -51,7 +51,10 @@
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body { background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--font-body); -webkit-text-size-adjust: 100%; }
+body { background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--font-body); -webkit-text-size-adjust: 100%; padding-top: env(safe-area-inset-top); padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+/* iPhone: campos com 16px evitam o zoom automático ao tocar; toques sem atraso de duplo toque */
+input, select, textarea { font-size: 16px !important; }
+a, button, input, select, label, .tile, .card { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 button, input { font: inherit; color: inherit; }
 h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
 .num { font-variant-numeric: tabular-nums; }
@@ -161,7 +164,7 @@ input[type=date] { width: 100%; min-height: 44px; padding: 6px 10px; border-radi
 .empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 14px; padding: 28px 18px; text-align: center; color: var(--muted); }
 .empty p { margin: 0 0 14px; }
 .card .pill { color: var(--state); }
-.dlg { position: fixed; inset: 0; z-index: 20; background: rgba(10,20,14,.45); display: flex; align-items: flex-start; justify-content: center; padding: 24px 12px; overflow-y: auto; }
+.dlg { position: fixed; inset: 0; z-index: 20; background: rgba(10,20,14,.45); display: flex; align-items: flex-start; justify-content: center; padding: calc(24px + env(safe-area-inset-top)) 12px calc(24px + env(safe-area-inset-bottom)); overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .dlg[hidden] { display: none; }
 .dbox { background: var(--surface); border-radius: 16px; padding: 18px; width: 100%; max-width: 460px; display: grid; gap: 12px; border: 1px solid var(--line); }
 .fl { display: grid; gap: 4px; font-weight: 600; font-size: 14px; }
@@ -232,7 +235,7 @@ input[type=date] { width: 100%; min-height: 44px; padding: 6px 10px; border-radi
 .tile small { display: block; font-size: 12px; color: var(--muted); line-height: 1.35; }
 .more { width: 100%; min-height: 48px; border-radius: 12px; border: 1.5px solid var(--line); background: transparent; color: var(--accent); font-weight: 600; cursor: pointer; }
 .sheetbg { position: fixed; inset: 0; background: rgba(10,20,14,.5); z-index: 30; }
-.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 31; max-width: 640px; margin: 0 auto; max-height: 92vh; overflow-y: auto; background: var(--bg); border-radius: 20px 20px 0 0; padding: 0 14px 28px; box-sizing: border-box; box-shadow: 0 -10px 30px -10px rgba(0,0,0,.4); overscroll-behavior: contain; }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 31; max-width: 640px; margin: 0 auto; max-height: calc(92dvh - env(safe-area-inset-top)); overflow-y: auto; overscroll-behavior: contain; padding-bottom: env(safe-area-inset-bottom); background: var(--bg); border-radius: 20px 20px 0 0; padding: 0 14px 28px; box-sizing: border-box; box-shadow: 0 -10px 30px -10px rgba(0,0,0,.4); overscroll-behavior: contain; }
 .shead { display: flex; justify-content: space-between; align-items: center; padding: 12px 2px 10px; }
 .shead h2 { font-size: 20px; }
 .sheet .meter { top: 0 !important; margin-bottom: 14px; }
@@ -1987,6 +1990,19 @@ function run(inp){
   } else { clearTimeout(loadTimer); startLocal('Salvando só neste aparelho: Firebase ainda não configurado (arquivo config.js).'); }
   window.glLogout = function(){ if (window.firebase && firebase.apps && firebase.apps.length) firebase.auth().signOut().then(function(){ location.reload(); }); };
 
+  // gesto de voltar: arrastar da borda esquerda para a direita (o app instalado no iPhone não tem botão de voltar do navegador)
+  (function(){
+    var sx = 0, sy = 0, on = false;
+    document.addEventListener('touchstart', function(e){ var t = e.touches[0]; on = t.clientX < 28; sx = t.clientX; sy = t.clientY; }, { passive: true });
+    document.addEventListener('touchend', function(e){
+      if (!on) return; on = false; var t = e.changedTouches[0], dx = t.clientX - sx, dy = Math.abs(t.clientY - sy);
+      if (dx > 70 && dy < 60){
+        if (!$('sheet').hidden){ closeSheet(); return; }
+        var dl = document.querySelector('.dlg:not([hidden])'); if (dl){ dl.hidden = true; return; }
+        if (!$('viewDetail').hidden || !$('viewList').hidden || !$('viewDes').hidden || !$('viewProj').hidden) history.back();
+      }
+    }, { passive: true });
+  })();
   // telas
   function applyT(t){
     Object.assign(state, DEF, t.inputs || {});
