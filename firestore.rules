@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Só a sua conta lê e grava. Troque SEU_UID pelo UID que aparece em Authentication → Users.
+    match /{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == "SEU_UID";
+    }
+  }
+}
