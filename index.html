@@ -474,6 +474,12 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 .wtank b { font-size: 15px; display: block; }
 .wtank span { color: var(--muted); }
 .wnone { font-size: 13px; color: var(--muted); }
+.wlast { display: flex; gap: 12px; align-items: center; background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 12px; padding: 10px 12px; }
+.wlast > span { width: 38px; height: 38px; flex: 0 0 auto; color: var(--accent); }
+.wlast > span svg { width: 100%; height: 100%; }
+.wlast .wl1 { font-size: 11.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.wlast .wl2 { font-size: 14px; } .wlast .wl2 b { font-family: var(--font-display); font-size: 22px; color: var(--ink); margin-right: 2px; }
+.wlast .wl3 { font-size: 12px; color: var(--muted); }
 .wchk { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; color: var(--ink); }
 .wchk i { flex: 0 0 auto; width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; background: var(--muted); }
 .wchk.good i { background: var(--good); } .wchk.warn i { background: var(--warn); } .wchk.crit i { background: var(--crit); }
@@ -1533,6 +1539,24 @@ function run(inp){
   var TN = { agua:'Água', calor:'Calor e eventos', solo:'Solo', nutri:'Nutrição', mato:'Plantas daninhas', pop:'Estande', mei:'Ambiente Meiosi' };
   function renderWx(r, durs, das, phase){
     var box = $('hWx'), wx = state.wx, t0 = isoToMs(state.today), DW = ['dom','seg','ter','qua','qui','sex','sáb'], h = '';
+    // Última chuva: dias já ocorridos (Open-Meteo observado) e pluviômetro das visitas
+    var last = null, s7 = 0, s30 = 0;
+    if (wx) Object.keys(wx).sort().reverse().forEach(function(k){
+      var v = wx[k], ms = isoToMs(k); if (!v || v[0] == null || ms > t0 || (v[4] && ms >= t0)) return;
+      var mm = +v[0] || 0, ago = Math.round((t0 - ms) / 864e5);
+      if (ago < 7) s7 += mm; if (ago < 30) s30 += mm;
+      if (!last && mm >= 1) last = { ms: ms, mm: mm, ago: ago, prev: !!v[4] };
+    });
+    var lv = (state.vis || []).filter(function(x){ return x && x.d && x.chuva != null && x.chuva !== '' && +x.chuva > 0 && isoToMs(x.d) <= t0; }).sort(function(a, b){ return isoToMs(b.d) - isoToMs(a.d); })[0];
+    if (last || lv || wx){
+      var agoTxt = function(n){ return n === 0 ? 'hoje' : n === 1 ? 'ontem' : 'há '+n+' dias'; };
+      h += '<div class="wlast"><span class="ic-rain">'+icoSvg(WX_ICO.rain, 2)+'</span><div>'
+        + '<div class="wl1">Última chuva</div>'
+        + (last ? '<div class="wl2"><b class="num">'+fmt(last.mm, last.mm < 10 ? 1 : 0)+' mm</b> '+agoTxt(last.ago)+' ('+fdt(last.ms)+')'+(last.prev ? ' <span class="wl3">· era previsão: importe o clima para confirmar</span>' : '')+'</div>' : '<div class="wl2">Sem chuva acima de 1 mm nos dados importados</div>')
+        + (wx ? '<div class="wl3">Últimos 7 dias: '+fmt(s7, 0)+' mm · 30 dias: '+fmt(s30, 0)+' mm (Open-Meteo)</div>' : '')
+        + (lv ? '<div class="wl3">Pluviômetro na visita de '+fdt(isoToMs(lv.d))+': '+fmt(+lv.chuva, 0)+' mm no período</div>' : '')
+        + '</div></div>';
+    }
     var days = [];
     if (wx) for (var i = 0; i < 7; i++){ var ms = t0 + i*864e5, d = new Date(ms), iso = d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0'); if (wx[iso]) days.push([i === 0 ? 'hoje' : DW[d.getUTCDay()], wx[iso]]); }
     if (days.length >= 3){
