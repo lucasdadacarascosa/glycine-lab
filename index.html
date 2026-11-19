@@ -207,6 +207,7 @@ input[type=date] { width: 100%; min-height: 44px; padding: 6px 10px; border-radi
 @keyframes hlp { 50% { outline-color: color-mix(in srgb, var(--crit) 35%, transparent); } }
 .rsub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
 .rpot { font-size: 13px; font-weight: 700; color: var(--ink); margin-top: 1px; }
+.rvar { font-size: 11.5px; font-weight: 600; color: var(--good); margin-top: 3px; padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, var(--good) 12%, transparent); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rsc { font-weight: 600; margin: 3px 0 6px; font-size: 14px; }
 .kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .kpis div { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 8px; text-align: center; }
@@ -360,7 +361,8 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 .htop { display: flex; gap: 14px; align-items: center; }
 .htop .ring { width: 150px; height: 150px; margin: 0; flex: 0 0 auto; }
 .htop .ring svg { width: 150px; height: 150px; }
-.htop .rbigv { font-size: 38px; }
+.htop .rbigv { font-size: 34px; line-height: 1; }
+.htop .rsub { font-size: 11.5px; margin-top: 0; } .htop .rpot { font-size: 12px; } .htop .rvar { font-size: 11px; max-width: 100px; margin-top: 2px; }
 .htop .rbigv small { font-size: 18px; }
 .htop .kpis { grid-template-columns: 1fr; flex: 1 1 auto; gap: 8px; }
 .htop .kpis div { text-align: left; padding: 8px 12px; border-radius: 12px; }
@@ -474,6 +476,10 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 .wtank b { font-size: 15px; display: block; }
 .wtank span { color: var(--muted); }
 .wnone { font-size: 13px; color: var(--muted); }
+.ccyc { background: color-mix(in srgb, var(--accent) 9%, transparent); border-radius: 12px; padding: 10px 12px; display: grid; gap: 4px; }
+.ccyc .wl1 { font-size: 11.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.ccyc .ccl { font-size: 13.5px; } .ccyc .cmm { font-family: var(--font-display); font-weight: 700; font-size: 20px; }
+.hlock { background: var(--surface); border-left: 5px solid var(--ink); border-radius: 14px; padding: 10px 14px; font-size: 13.5px; }
 .wlast { display: flex; gap: 12px; align-items: center; background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 12px; padding: 10px 12px; }
 .wlast > span { width: 38px; height: 38px; flex: 0 0 auto; color: var(--accent); }
 .wlast > span svg { width: 100%; height: 100%; }
@@ -548,6 +554,7 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   <div class="sync" id="pSync" style="margin-top:6px"></div>
   <div class="cards" id="pCards"></div>
   <button type="button" class="newp" id="newP" style="margin-top:12px">+ Novo projeto</button>
+  <a href="#safras" class="ccard dlink" id="pClose" style="margin-top:12px"><span><h2 id="pCloseT">Encerrar a safra</h2><span class="cs" id="pCloseS">Registre as colheitas e feche o experimento na tela Safras</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></a>
 </div>
 
 <div class="lv" id="viewAnd" hidden>
@@ -703,6 +710,7 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   </div>
 
   <section class="hud" id="hud">
+    <div class="hlock" id="hLock" hidden></div>
     <div class="hcol" id="hCol" hidden></div>
     <div class="htop">
     <div class="ring" id="hRing">
@@ -710,7 +718,7 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
         <circle class="trk" cx="118" cy="118" r="100" fill="none" stroke-width="16"></circle>
         <circle id="ringFill" cx="118" cy="118" r="100" fill="none" stroke-width="16" stroke-linecap="round" stroke-dasharray="0 629" transform="rotate(-90 118 118)"></circle>
       </svg>
-      <div class="rc"><div class="rbigv num"><span id="hRet">0</span><small>%</small></div><div class="rsub">do potencial</div><div class="rpot num" id="hPot"></div><div class="rsc num" id="hYld" hidden></div><span class="pill" id="hPill" hidden></span></div>
+      <div class="rc"><div class="rbigv num"><span id="hRet">0</span><small>%</small></div><div class="rsub">do potencial</div><div class="rpot num" id="hPot"></div><div class="rvar" id="hVar"></div><div class="rsc num" id="hYld" hidden></div><span class="pill" id="hPill" hidden></span></div>
     </div>
     <div class="kpis"><div><b class="num" id="hTot"></b><span id="hTotL"></span></div><div><b class="num" id="hDays"></b><span id="hDaysL"></span><small class="kw" id="hDaysW"></small></div><div><b class="num" id="hTeto"></b><span id="hTetoL"></span><small class="kw" id="hTetoW"></small></div></div>
     </div>
@@ -1554,6 +1562,7 @@ function run(inp){
         + '<div class="wl1">Última chuva</div>'
         + (last ? '<div class="wl2"><b class="num">'+fmt(last.mm, last.mm < 10 ? 1 : 0)+' mm</b> '+agoTxt(last.ago)+' ('+fdt(last.ms)+')'+(last.prev ? ' <span class="wl3">· era previsão: importe o clima para confirmar</span>' : '')+'</div>' : '<div class="wl2">Sem chuva acima de 1 mm nos dados importados</div>')
         + (wx ? '<div class="wl3">Últimos 7 dias: '+fmt(s7, 0)+' mm · 30 dias: '+fmt(s30, 0)+' mm (Open-Meteo)</div>' : '')
+        + (function(){ var rc = curId ? rainCycle(curId) : null; return rc && rc.n && !rc.antes ? '<div class="wl3"><b>No ciclo: '+fmt(rc.mm,0)+' mm</b> desde a semeadura'+(rc.closed ? (rc.why === 'colheita' ? ' (fechado na colheita)' : ' (fechado no encerramento)') : '')+'</div>' : ''; })()
         + (lv ? '<div class="wl3">Pluviômetro na visita de '+fdt(isoToMs(lv.d))+': '+fmt(+lv.chuva, 0)+' mm no período</div>' : '')
         + '</div></div>';
     }
@@ -1584,7 +1593,7 @@ function run(inp){
     }
     box.innerHTML = h;
   }
-  $('hWx').addEventListener('click', function(e){ if (e.target.closest('[data-wx]')) $('openWx').click(); });
+  $('hWx').addEventListener('click', function(e){ if (e.target.closest('[data-wx]') && !safraFechada(curSafra)) $('openWx').click(); });
   function renderHud(r, rows, worst, maxLoss, cyc, durs, das, phase, lv, lk, LN, level, label){
     var ret = r.retained*100, pot = r.pot;
     $('hRing').className = 'ring state-'+level;
@@ -1595,6 +1604,7 @@ function run(inp){
     $('hPill').innerHTML = ICON[level]+label;
     var area = (typeof curId !== 'undefined' && curId && talhoes[curId]) ? +talhoes[curId].area : 0;
     $('hPot').textContent = 'de '+fmt(state.pot)+' sc/ha';
+    var vv = VARIETIES[state.vari]; $('hVar').textContent = vv ? vv.nome.replace('Brasmax ','').replace('Pioneer ','').replace(' IPRO','').replace(' CE','') : ''; $('hVar').title = vv ? vv.nome : '';
     $('hTot').textContent = fmt(r.yield,1); $('hTotL').textContent = 'sc/ha'+(area ? ' · '+fmt(r.yield*area,0)+' sc' : '');
     $('hDays').textContent = (r.lossPast >= 0.05 ? '−' : '')+fmt(r.lossPast,1); $('hDaysL').textContent = 'sc/ha já perdidas';
     var GN = { agua: 'água', clima: 'calor/eventos', compact: 'solo', prep: 'solo', fert: 'nutrição', nutri: 'nutrição', mato: 'daninhas', pop: 'estande', p0: 'perda anterior' };
@@ -1674,7 +1684,7 @@ function run(inp){
     mei: ['mAmb', 'mSint', 'preparo']
   };
   $('hTiles').addEventListener('click', function(e){
-    var b = e.target.closest('.tile'); if (!b) return;
+    var b = e.target.closest('.tile'); if (!b || safraFechada(curSafra)) return;
     var fs = [];
     (TILE_FIELD[b.dataset.k] || []).forEach(function(id){ var el = $(id), f = el ? el.closest('.field') : null; if (f && fs.indexOf(f) < 0 && !f.hidden && f.offsetParent !== null || (f && fs.indexOf(f) < 0 && !f.hidden && $('sheet').hidden)) fs.push(f); });
     openSheet(null);
@@ -2119,6 +2129,10 @@ function run(inp){
 
   // tela 1: projetos
   function renderProjects(){ try { updBadge(); } catch(e){}
+    (function(){ var ids = Object.keys(talhoes), nC = ids.filter(function(k){ return talhoes[k].colheita; }).length, fe = safraFechada(curSafra);
+      $('pCloseT').textContent = fe ? 'Safra '+safraNome(curSafra)+' encerrada' : 'Encerrar a safra '+safraNome(curSafra);
+      $('pCloseS').textContent = fe ? 'Dados fechados para consulta. Para reabrir, vá em Safras.' : (ids.length ? nC+' de '+ids.length+(ids.length === 1 ? ' talhão colhido' : ' talhões colhidos')+'. Encerrar fecha o experimento e grava o retrato final.' : 'Cadastre talhões para começar.');
+      $('pClose').hidden = !ids.length && !fe; })();
     $('pSafraLink').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Safra '+safraNome(curSafra)+(safraFechada(curSafra) ? ' · encerrada' : '');
     var ids = projIds();
     if (mode === 'carregando' && !ids.length){ $('pCards').innerHTML = '<div class="empty"><p>Carregando projetos…</p></div>'; return; }
@@ -2149,7 +2163,7 @@ function run(inp){
   }
 
   // tela 2: projeto, com abas
-  function renderProject(){
+  function renderProject(){ try { applyLock(); } catch(e){}
     var pid = curProj, p = projData(pid); if (!p) return;
     var ids = talhoesOf(pid);
     $('lName').textContent = p.nome;
@@ -2301,7 +2315,15 @@ function run(inp){
       preparo: s0.preparo, form: s0.form, dose: s0.dose, kcl: s0.kcl, p2o5: s0.p2o5, k2o: s0.k2o, palhaT: palhaT0(s0), pop: r.stand ? r.stand.pop : s0.pop, fal: r.stand ? r.stand.fal : s0.fal,
       mAmb: s0.mAmb, cm: s0.cm, ciclo: Math.round(r.cycle), chuva: nd ? Math.round(rain) : null, chuvaDias: nd, area: t.area };
   }
-  function renderCol(){
+  function applyLock(){
+    var lk = safraFechada(curSafra), sf = safras['s' + curSafra];
+    $('hLock').hidden = !lk;
+    if (lk) $('hLock').innerHTML = '<b>Safra '+safraNome(curSafra)+' encerrada'+(sf && sf.fechada ? ' em '+fdt(Date.parse(sf.fechada)) : '')+'.</b> Experimento fechado: os dados ficam só para consulta. Para corrigir algo, reabra a safra na tela Safras.';
+    ['openVisit','openSheet','openHarv','tEdit','tDel'].forEach(function(id){ var b = document.getElementById(id); if (b){ b.disabled = lk; b.style.opacity = lk ? .45 : ''; } });
+    var nb = document.getElementById('newT'); if (nb){ nb.disabled = lk; nb.style.opacity = lk ? .45 : ''; }
+    document.body.classList.toggle('locked', lk);
+  }
+  function renderCol(){ applyLock();
     var t = curId ? talhoes[curId] : null, c = t && t.colheita;
     $('openHarv').textContent = c ? 'Editar colheita' : 'Registrar colheita';
     if (!c){ $('hCol').hidden = true; return; }
@@ -2457,18 +2479,39 @@ function run(inp){
     var html = [];
     projIds().forEach(function(pid){
       var pn = projData(pid).nome, tids = talhoesOf(pid);
-      areasOf(pid).forEach(function(a){ var ts = tids.filter(function(k){ return talhoes[k].areaId === a; }); html.push(cCard(areas[a].nome, pn+' · '+ts.length+(ts.length === 1 ? ' talhão' : ' talhões'), ts[0])); });
+      areasOf(pid).forEach(function(a){ var ts = tids.filter(function(k){ return talhoes[k].areaId === a; }); html.push(cCard(areas[a].nome, pn+' · '+ts.length+(ts.length === 1 ? ' talhão' : ' talhões'), ts[0], ts)); });
       tids.filter(function(k){ return !areaOf(talhoes[k]); }).forEach(function(k){ html.push(cCard(talhoes[k].nome, pn+' · talhão avulso', k)); });
     });
     $('cList').innerHTML = html.length ? html.join('') : '<div class="empty"><p>Cadastre uma área ou talhão para importar o clima.</p></div>';
   }
-  function cCard(nome, sub, tid){
+  // Chuva acumulada no ciclo: da semeadura até hoje; fecha na colheita (ou no encerramento da safra)
+  function rainCycle(tid){
+    var t = talhoes[tid] || allT[tid]; if (!t) return null;
+    var d = wxFor(tid), s0 = Object.assign({}, DEF, t.inputs || {}), a = DAY0 + sowRng(s0)[0] * 864e5, tms = isoToMs(state.today), end = tms, why = 'hoje', closed = false;
+    if (t.colheita && t.colheita.data){ end = Math.min(tms, isoToMs(t.colheita.data)); why = 'colheita'; closed = true; }
+    else { var sf = safras['s' + tSafra(t)]; if (sf && sf.status === 'fechada' && sf.fechada){ var fd = new Date(sf.fechada); end = Math.min(tms, Date.UTC(fd.getFullYear(), fd.getMonth(), fd.getDate())); why = 'encerramento'; closed = true; } }
+    if (a > tms) return { antes: true, a: a };
+    var mm = 0, n = 0, first = null, prev = 0;
+    if (d) Object.keys(d).sort().forEach(function(k){ var ms = isoToMs(k), v = d[k]; if (!v || v[0] == null || ms < a || ms > end) return; if (ms === tms && v[4]) return; mm += +v[0] || 0; n++; if (first == null) first = ms; if (v[4]) prev += +v[0] || 0; });
+    var tot = Math.round((end - a) / 864e5) + 1; if (end === tms && !(d && d[state.today] && !d[state.today][4])) tot--;
+    return { mm: mm, n: n, tot: tot, a: a, end: end, why: why, closed: closed, first: first, prev: prev, nome: t.nome };
+  }
+  function rainCycleTxt(rc){
+    if (!rc) return '';
+    if (rc.antes) return 'Chuva no ciclo: começa a contar na semeadura ('+fdt(rc.a)+').';
+    if (!rc.n) return 'Chuva no ciclo: sem clima importado para o período desde a semeadura ('+fdt(rc.a)+').';
+    return fmt(rc.mm, 0)+' mm de '+fdt(rc.a)+' a '+fdt(rc.end)+(rc.closed ? (rc.why === 'colheita' ? ' · fechado na colheita' : ' · fechado no encerramento da safra') : ' · até hoje')
+      + (rc.n < rc.tot ? ' · '+(rc.tot - rc.n)+((rc.tot - rc.n) === 1 ? ' dia sem dados' : ' dias sem dados') : '') + (rc.prev > 0.5 ? ' · '+fmt(rc.prev,0)+' mm vieram de previsão antiga' : '');
+  }
+  function cCard(nome, sub, tid, ts){
     var c = tid ? wxInfo(tid) : null, st = !tid ? 'Sem talhões: cadastre um talhão para importar.' : wxStatus(tid);
     var fut = c && c.d ? Object.keys(c.d).filter(function(k){ return k > state.today; }).length : 0;
     return '<div class="ccard"><div class="chead"><div><h2>'+esc(nome)+'</h2><div class="cs">'+esc(sub)+'</div></div>'+(c && c.d ? '<span class="pill" style="color:'+(fut >= 3 ? 'var(--good)' : 'var(--warn)')+'">'+(fut >= 3 ? fut+' dias de previsão' : 'previsão vencida')+'</span>' : '')+'</div>'
       + (tid ? (function(){ var k = wxCheck(tid), tx = wxCheckTxt(k); return tx ? '<div class="wchk '+wxCheckCls(k)+'"><i></i><span>'+esc(tx)+'</span></div>' : ''; })() : '')
+      + (function(){ var L = (ts && ts.length ? ts : (tid ? [tid] : [])); if (!L.length) return '';
+          return '<div class="ccyc"><div class="wl1">Chuva acumulada no ciclo</div>'+L.map(function(k){ var rc = rainCycle(k); return '<div class="ccl">'+(L.length > 1 ? '<b>'+esc(rc ? rc.nome : '')+':</b> ' : '')+(rc && rc.n && !rc.antes ? '<span class="cmm num">'+fmt(rc.mm,0)+' mm</span> ' : '')+'<span class="cs">'+esc(rainCycleTxt(rc).replace(/^\d[\d.]* mm /, ''))+'</span></div>'; }).join('')+'</div>'; })()
       + '<div class="cs">'+esc(st)+'</div>'
-      + (tid ? '<button type="button" class="btn'+(c && c.d && fut >= 3 ? ' ghost' : '')+'" data-ct="'+esc(tid)+'">'+(c && c.d ? 'Atualizar clima' : 'Importar clima')+'</button>' : '')+'</div>';
+      + (tid && !safraFechada(curSafra) ? '<button type="button" class="btn'+(c && c.d && fut >= 3 ? ' ghost' : '')+'" data-ct="'+esc(tid)+'">'+(c && c.d ? 'Atualizar clima' : 'Importar clima')+'</button>' : '')+'</div>';
   }
   $('cList').addEventListener('click', function(e){ var b = e.target.closest('[data-ct]'); if (!b) return; pendingWx = true; location.hash = 't-' + b.dataset.ct; });
   function bkData(){ return { app: 'Glycine Lab', versao: 1, exportado: new Date().toISOString(), safras: safras, projetos: projetos, areas: areas, talhoes: allT, clima: clima }; }
@@ -2773,6 +2816,7 @@ function run(inp){
   // nunca depois do fim da previsão importada.
   function wxCheck(id){
     var t = talhoes[id]; if (!t) return null;
+    if (safraFechada(tSafra(t)) || t.colheita) return { done: true };
     var c = wxInfo(id), tms = isoToMs(state.today);
     var e = evalT(t), ph = phenology(Object.assign({}, e.s, { auto: true })), das = ph.das, cc = 0, si = -1;
     if (das >= 0){ si = 10; for (var q = 0; q < ph.dur.length; q++){ if (das < cc + ph.dur[q]){ si = q; break; } cc += ph.dur[q]; } }
