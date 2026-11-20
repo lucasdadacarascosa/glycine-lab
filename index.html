@@ -526,6 +526,16 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   <div id="dBody"></div>
 </div>
 
+<div class="dlg" id="dlgP2" hidden><form class="dbox" id="fP2" novalidate>
+  <h2>Chuva do pluviômetro</h2>
+  <div class="hint" id="fPWho"></div>
+  <div class="frow"><label class="fl">Data<input id="fPData" type="date"></label><label class="fl">Chuva (mm)<input id="fPmm" type="number" min="0" max="300" step="0.1" inputmode="decimal"></label></div>
+  <div class="hint">Lance a leitura do dia em que choveu. Ela substitui a chuva estimada pela Open-Meteo nesse dia, no balanço de água e no acumulado do ciclo. Lançar de novo na mesma data corrige o valor.</div>
+  <div id="fPList"></div>
+  <p class="ferr" id="fPErr" role="alert"></p>
+  <div class="fbtn"><button type="button" class="btn ghost" id="fP2Cancel">Fechar</button><button type="submit" class="btn">Salvar</button></div>
+</form></div>
+
 <div class="dlg" id="dlgH" hidden><form class="dbox" id="fH" novalidate>
   <h2>Registrar colheita</h2>
   <div class="hint" id="fHWho"></div>
@@ -1553,17 +1563,19 @@ function run(inp){
       var v = wx[k], ms = isoToMs(k); if (!v || v[0] == null || ms > t0 || (v[4] && ms >= t0)) return;
       var mm = +v[0] || 0, ago = Math.round((t0 - ms) / 864e5);
       if (ago < 7) s7 += mm; if (ago < 30) s30 += mm;
-      if (!last && mm >= 1) last = { ms: ms, mm: mm, ago: ago, prev: !!v[4] };
+      if (!last && mm >= 1) last = { ms: ms, mm: mm, ago: ago, prev: !!v[4], pl: v[5] === 'p' };
     });
     var lv = (state.vis || []).filter(function(x){ return x && x.d && x.chuva != null && x.chuva !== '' && +x.chuva > 0 && isoToMs(x.d) <= t0; }).sort(function(a, b){ return isoToMs(b.d) - isoToMs(a.d); })[0];
-    if (last || lv || wx){
+    var pluvBtn = '<button type="button" class="wup" data-pluv="1" style="margin:4px 0 0;min-height:36px">+ Lançar chuva do pluviômetro</button>';
+    if (last || lv || wx || true){
       var agoTxt = function(n){ return n === 0 ? 'hoje' : n === 1 ? 'ontem' : 'há '+n+' dias'; };
       h += '<div class="wlast"><span class="ic-rain">'+icoSvg(WX_ICO.rain, 2)+'</span><div>'
         + '<div class="wl1">Última chuva</div>'
-        + (last ? '<div class="wl2"><b class="num">'+fmt(last.mm, last.mm < 10 ? 1 : 0)+' mm</b> '+agoTxt(last.ago)+' ('+fdt(last.ms)+')'+(last.prev ? ' <span class="wl3">· era previsão: importe o clima para confirmar</span>' : '')+'</div>' : '<div class="wl2">Sem chuva acima de 1 mm nos dados importados</div>')
+        + (last ? '<div class="wl2"><b class="num">'+fmt(last.mm, last.mm < 10 ? 1 : 0)+' mm</b> '+agoTxt(last.ago)+' ('+fdt(last.ms)+')'+(last.pl ? ' <span class="wl3">· pluviômetro</span>' : '')+(last.prev ? ' <span class="wl3">· era previsão: importe o clima para confirmar</span>' : '')+'</div>' : '<div class="wl2">Sem chuva acima de 1 mm nos dados importados</div>')
         + (wx ? '<div class="wl3">Últimos 7 dias: '+fmt(s7, 0)+' mm · 30 dias: '+fmt(s30, 0)+' mm (Open-Meteo)</div>' : '')
         + (function(){ var rc = curId ? rainCycle(curId) : null; return rc && rc.n && !rc.antes ? '<div class="wl3"><b>No ciclo: '+fmt(rc.mm,0)+' mm</b> desde a semeadura'+(rc.closed ? (rc.why === 'colheita' ? ' (fechado na colheita)' : ' (fechado no encerramento)') : '')+'</div>' : ''; })()
         + (lv ? '<div class="wl3">Pluviômetro na visita de '+fdt(isoToMs(lv.d))+': '+fmt(+lv.chuva, 0)+' mm no período</div>' : '')
+        + (!safraFechada(curSafra) ? pluvBtn : '')
         + '</div></div>';
     }
     var days = [];
@@ -1593,7 +1605,23 @@ function run(inp){
     }
     box.innerHTML = h;
   }
-  $('hWx').addEventListener('click', function(e){ if (e.target.closest('[data-wx]') && !safraFechada(curSafra)) $('openWx').click(); });
+  $('hWx').addEventListener('click', function(e){
+    if (e.target.closest('[data-wx]') && !safraFechada(curSafra)) $('openWx').click();
+    if (e.target.closest('[data-pluv]') && !safraFechada(curSafra)){ $('fPData').value = state.today; $('fPmm').value = ''; $('fPErr').textContent = ''; $('fPWho').textContent = wxLoc(curId).nome + ': a chuva vale para todos os talhões desta área.'; renderPList(); $('dlgP2').hidden = false; $('fPmm').focus(); }
+  });
+  function renderPList(){
+    var c = clima[wxKey(curId)] || {}, p = c.p || {}, ks = Object.keys(p).sort().reverse().slice(0, 8);
+    $('fPList').innerHTML = ks.length ? '<div class="wl1" style="font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Lançados</div>' + ks.map(function(k){ return '<div class="drow"><span class="dn">'+fdt(isoToMs(k))+'</span><span class="dv">'+fmt(+p[k],1)+' mm <button type="button" class="wup" data-pdel="'+k+'" aria-label="Apagar chuva de '+fdt(isoToMs(k))+'">apagar</button></span></div>'; }).join('') : '';
+  }
+  $('fPList').addEventListener('click', function(e){ var b = e.target.closest('[data-pdel]'); if (!b) return; var key = wxKey(curId), c = clone(clima[key] || {}); if (c.p){ delete c.p[b.dataset.pdel]; putC(key, c); } renderPList(); state.wx = wxFor(curId); render(); });
+  $('fP2Cancel').addEventListener('click', function(){ $('dlgP2').hidden = true; });
+  $('fP2').addEventListener('submit', function(e){
+    e.preventDefault(); var dt = $('fPData').value, mm = parseFloat(String($('fPmm').value).replace(',', '.'));
+    if (!dt || isoToMs(dt) > isoToMs(state.today)){ $('fPErr').textContent = 'Escolha uma data até hoje.'; return; }
+    if (!(mm >= 0 && mm <= 300)){ $('fPErr').textContent = 'Informe a chuva em mm (0 a 300).'; return; }
+    var key = wxKey(curId), c = clone(clima[key] || {}); c.p = c.p || {}; c.p[dt] = Math.round(mm * 10) / 10; if (!c.atualizado) c.atualizado = null; putC(key, c);
+    $('dlgP2').hidden = true; state.wx = wxFor(curId); render();
+  });
   function renderHud(r, rows, worst, maxLoss, cyc, durs, das, phase, lv, lk, LN, level, label){
     var ret = r.retained*100, pot = r.pot;
     $('hRing').className = 'ring state-'+level;
@@ -1926,7 +1954,11 @@ function run(inp){
   function putA(id, a){ areas[id] = a; return write('areas', id, a); }
   function delA(id){ delete areas[id]; return write('areas', id, null); }
   // dados diários automáticos (Open-Meteo), gravados pela tarefa agendada: um documento por área ou por talhão avulso
-  function wxFor(id){ var t = talhoes[id]; if (!t) return null; var c = clima[areaOf(t) || id] || clima[id]; return c && c.d ? c.d : null; }
+  // Chuva do pluviômetro (registro rápido) substitui a chuva da Open-Meteo naquele dia
+  function wxFor(id){ var t = talhoes[id]; if (!t) return null; var c = clima[areaOf(t) || id] || clima[id]; if (!c || (!c.d && !c.p)) return null;
+    if (!c.p) return c.d; var d = Object.assign({}, c.d || {});
+    Object.keys(c.p).forEach(function(k){ var o = d[k] ? d[k].slice() : [null, null, null, null, 0]; o[0] = +c.p[k]; o[4] = 0; o[5] = 'p'; d[k] = o; });
+    return d; }
   function wxInfo(id){ var t = talhoes[id]; if (!t) return null; return clima[areaOf(t) || id] || clima[id] || null; }
   function areaOf(t){ return t && t.areaId && areas[t.areaId] ? t.areaId : null; }
   function siblings(id){ var a = areaOf(talhoes[id]); return a ? Object.keys(talhoes).filter(function(k){ return k !== id && talhoes[k].areaId === a; }) : []; }
@@ -2081,6 +2113,7 @@ function run(inp){
     $('ringFill').setAttribute('stroke-dasharray', '0 629'); void $('ringFill').getBoundingClientRect();
     setHeader(); render(); renderVisits(); window.scrollTo(0, 0);
     if (pendingWx){ pendingWx = false; openWx(); }
+    autoWx([id], function(){ if (curId === id){ state.wx = wxFor(id); render(); } });
   }
   var pendingWx = false;
   function updBadge(){
@@ -2129,6 +2162,7 @@ function run(inp){
 
   // tela 1: projetos
   function renderProjects(){ try { updBadge(); } catch(e){}
+    autoWx(null, function(){ try { updBadge(); } catch(e){} });
     (function(){ var ids = Object.keys(talhoes), nC = ids.filter(function(k){ return talhoes[k].colheita; }).length, fe = safraFechada(curSafra);
       $('pCloseT').textContent = fe ? 'Safra '+safraNome(curSafra)+' encerrada' : 'Encerrar a safra '+safraNome(curSafra);
       $('pCloseS').textContent = fe ? 'Dados fechados para consulta. Para reabrir, vá em Safras.' : (ids.length ? nC+' de '+ids.length+(ids.length === 1 ? ' talhão colhido' : ' talhões colhidos')+'. Encerrar fecha o experimento e grava o retrato final.' : 'Cadastre talhões para começar.');
@@ -2476,6 +2510,7 @@ function run(inp){
   });
   function renderGAnd(){ renderAndamento(Object.keys(talhoes), 'g'); }
   function renderClima(){
+    autoWx(null, function(n){ if (!$('viewClima').hidden) renderClima(); });
     var html = [];
     projIds().forEach(function(pid){
       var pn = projData(pid).nome, tids = talhoesOf(pid);
@@ -2838,6 +2873,7 @@ function run(inp){
   }
   function wxCheckTxt(k){
     if (!k || k.done) return '';
+    if (autoOk() && !k.none) return 'Atualiza sozinho ao abrir o app com internet (último dado '+(k.ago === 0 ? 'de hoje' : k.ago === 1 ? 'de ontem' : 'de '+k.ago+' dias atrás')+').';
     if (k.none) return 'Sem clima importado. Importe para começar o monitoramento (depois, a cada '+k.iv+' dias: '+k.why+').';
     var a = k.ago === 0 ? 'hoje' : k.ago === 1 ? 'ontem' : 'há '+k.ago+' dias';
     return k.left > 0 ? 'Importado '+a+'. Próxima checagem em '+k.left+(k.left === 1 ? ' dia' : ' dias')+' ('+fdt(k.next)+'; '+k.why+').' : k.left === 0 ? 'Importado '+a+'. Checagem para hoje ('+k.why+').' : 'Importado '+a+'. Checagem atrasada '+(-k.left)+(k.left === -1 ? ' dia' : ' dias')+' ('+k.why+').';
@@ -2876,7 +2912,12 @@ function run(inp){
     if (!dy || !dy.time || !dy.time.length || !dy.precipitation_sum){ $('fWErr').textContent = 'O texto não tem os dados diários esperados. Use o link do passo 1.'; return; }
     var L = wxLoc(curId);
     if (typeof j.latitude === 'number' && (Math.abs(j.latitude - L.lat) > 0.2 || Math.abs(j.longitude - L.lon) > 0.2)){ $('fWErr').textContent = 'Esses dados são de outro local ('+j.latitude.toFixed(2)+', '+j.longitude.toFixed(2)+'). Abra o link deste talhão.'; return; }
-    var key = wxKey(curId), old = clima[key] && clima[key].d ? clone(clima[key].d) : {}, today = state.today, n = 0;
+    var n = wxMerge(curId, j);
+    state.wx = wxFor(curId); closeWx(); render();
+    $('syncNote').textContent = n+' dias de clima importados para '+L.nome+'.';
+  });
+  function wxMerge(id, j){
+    var dy = j.daily, L = wxLoc(id), key = wxKey(id), prev = clima[key] || {}, old = prev.d ? clone(prev.d) : {}, today = state.today, n = 0;
     var r1 = function(x){ return x == null ? null : Math.round(+x * 10) / 10; };
     dy.time.forEach(function(t, i){
       if (!/^\d{4}-\d{2}-\d{2}$/.test(t) || dy.precipitation_sum[i] == null) return;
@@ -2884,10 +2925,28 @@ function run(inp){
       n++;
     });
     // a previsão antiga que já virou passado é substituída pelo dado novo; nada além disso é apagado
-    putC(key, { lat: L.lat, lon: L.lon, fonte: 'Open-Meteo', atualizado: new Date().toISOString(), d: old });
-    state.wx = wxFor(curId); closeWx(); render();
-    $('syncNote').textContent = n+' dias de clima importados para '+L.nome+'.';
-  });
+    var nc = { lat: L.lat, lon: L.lon, fonte: 'Open-Meteo', atualizado: new Date().toISOString(), d: old }; if (prev.p) nc.p = prev.p;
+    putC(key, nc);
+    return n;
+  }
+  // Clima automático: busca a Open-Meteo direto do aparelho quando há internet (no app instalado).
+  // Atualiza cada área no máximo a cada 6 horas; falhas são silenciosas (o copiar e colar continua valendo).
+  var autoTry;
+  function autoOk(){ return !(window.claude && typeof window.claude.use === 'function'); }
+  function autoWx(ids, done){
+    autoTry = autoTry || {};
+    if (!window.fetch || !autoOk() || navigator.onLine === false) return;
+    var keys = {}; (ids || Object.keys(talhoes)).forEach(function(k){ var t = talhoes[k]; if (!t || t.colheita || safraFechada(tSafra(t))) return; var key = wxKey(k), L = wxLoc(k); if (!L || !isFinite(+L.lat) || !isFinite(+L.lon)) return; if (!keys[key]) keys[key] = k; });
+    var pend = 0, got = 0;
+    Object.keys(keys).forEach(function(key){
+      var c = clima[key], age = c && c.atualizado ? Date.now() - Date.parse(c.atualizado) : 1e12;
+      if (age < 6 * 36e5 || (autoTry[key] && Date.now() - autoTry[key] < 30 * 6e4)) return;
+      autoTry[key] = Date.now(); pend++;
+      fetch(wxUrl(keys[key])).then(function(r){ if (!r.ok) throw 0; return r.json(); }).then(function(j){
+        if (j && j.daily && j.daily.time){ var n = wxMerge(keys[key], j); if (n) got++; }
+      }).catch(function(){}).then(function(){ if (--pend === 0 && got && done) done(got); });
+    });
+  }
 
   // visitas
   $('fVSt').innerHTML = '<option value="">Não observado</option>' + STAGES.map(function(st, i){ return '<option value="'+i+'">'+st.k+'</option>'; }).join('');
