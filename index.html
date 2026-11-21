@@ -1010,7 +1010,8 @@ const VARIETIES = [
   { id: 'FUR', nome: 'Brasmax Fúria CE',   ciclo: 'tardio',       gm: 6.5, ref: 116, curve: [125.5, 110.5, 94], late: 0.0050,
     ficha: [], pop: [200, 300], popGen: true },
   // Fibra e BRS 1061: sem ensaio próprio; curva interpolada pelo grupo de maturação entre Flecha (GM 6,2: 124, 107, 91 dias) e Ícone (GM 6,8: 127, 114, 97). Ciclo de referência estimado.
-  { id: 'FIB', nome: 'Brasmax Fibra IPRO', ciclo: 'precoce', gm: 6.4, ref: 114, est: true, curve: [125, 109.3, 93], late: 0.0050,
+  // Fibra: ciclo ajustado para 110 dias. Em Anaurilândia-MS (22 S, semeada em 19/10/2024) maturou com 107 dias (Fundação MS); a estimativa anterior pelo GM era 114.
+  { id: 'FIB', nome: 'Brasmax Fibra IPRO', ciclo: 'precoce', gm: 6.4, ref: 110, est: true, curve: [125, 109.3, 93], late: 0.0050,
     ficha: ['Alto potencial produtivo nas regiões quentes', 'Excelente pacote sanitário e resistência à podridão radicular de fitóftora (raça 1)', 'Alto potencial de ramificação e ampla janela de plantio', 'Exigência de fertilidade baixa/média', 'Resistência a acamamento moderada'], pop: [220, 340] },
   { id: 'B61', nome: 'BRS 1061 IPRO', ciclo: 'precoce', gm: 6.1, ref: 110, est: true, curve: [123.5, 105.8, 90], late: 0.0050,
     ficha: ['Alto potencial produtivo em regiões mais altas e férteis', 'Estabilidade acima de 500 m na Macrorregião 2', 'Precoce: permite semeadura antecipada e segunda safra'], pop: [200, 300], popGen: true },
@@ -1025,16 +1026,24 @@ const VARIETIES = [
     ficha: ['Precocidade, com amplitude geográfica e de época de plantio', 'Estabilidade produtiva', 'Tolerante ao nematoide de cisto (raça 3)', 'Tolerante a cancro da haste e fitóftora; suscetível a oídio'], pop: [220, 260] },
 ];
 const VTEC = { BAT: ['Conkesta E3', 'GDM (Brasmax)'], FUR: ['Conkesta E3', 'GDM (Brasmax)'], FIB: ['IPRO', 'GDM (Brasmax)'], B61: ['IPRO', 'Embrapa'], IGU: ['IPRO', 'HO Genética'] };
-// Potencial de referência por cultivar = 90 sc/ha (base regional do app) × índice relativo de ensaio.
-// Índice: produtividade da cultivar ÷ média do ensaio da Fundação MS em Anaurilândia-MS (2023/24, 370 m, sequeiro, média 60,62 sc/ha).
-// Como é um único ensaio, o índice é puxado metade do caminho para 1 (encolhimento). Sem ensaio regional: índice 1.
+// Potencial de referência por cultivar = 90 sc/ha (base regional do app) × índice relativo de ensaios.
+// Índice de cada ensaio-safra = produtividade da cultivar ÷ média do ensaio (mesmo local, mesma safra).
+// O índice final é a média dos ensaios, puxada para 1 conforme o número de ensaios: peso n/(n+1).
+// Assim, 1 ensaio vale metade do desvio; 3 ensaios, 75%; 6 ensaios, 86%. Sem ensaio público: índice 1.
 const POT_BASE = 90;
 const POT_IDX = {
-  FUR: { raw: 69.33 / 60.62, src: 'Fundação MS, Anaurilândia-MS 2023/24: 69,3 sc/ha (média do ensaio 60,6)' },
-  FIB: { raw: 60.06 / 60.62, src: 'Fundação MS, Anaurilândia-MS 2023/24: 60,1 sc/ha (média do ensaio 60,6)' },
-  B61: { raw: 46.22 / 60.62, src: 'Fundação MS, Anaurilândia-MS 2023/24: 46,2 sc/ha (média do ensaio 60,6). Ensaio a 370 m; a cultivar rende melhor acima de 500 m, então pode estar subestimada para Araraquara' }
+  FUR: { r: [69.33/60.62, 43.9/42.2, 1.02],
+    src: 'Fundação MS (3 ensaios): Anaurilândia-MS 2023/24, 69,3 sc/ha (média 60,6); Anaurilândia-MS 2024/25, 43,9 sc/ha (média 42,2); rede de 14 ambientes em MS 2024/25, 2% acima da média geral' },
+  FIB: { r: [60.06/60.62, 44.9/42.2, 1.015, 83.67/82.95, 90.10/91.42, 81.62/85.12],
+    src: 'Fundação MS (6 ensaios): Anaurilândia-MS 2023/24 e 2024/25 (60,1 e 44,9 sc/ha; médias 60,6 e 42,2), rede de 14 ambientes 2024/25 (1 a 2% acima da média) e Ponta Porã-MS em 3 safras (83,7, 90,1 e 81,6 sc/ha; médias 83,0, 91,4 e 85,1)' },
+  B61: { r: [46.22/60.62, 82.30/82.95, 92.38/91.42, 81.79/85.12],
+    src: 'Fundação MS (4 ensaios): Anaurilândia-MS 2023/24, 46,2 sc/ha (média 60,6; 370 m) e Ponta Porã-MS em 3 safras, 82,3, 92,4 e 81,8 sc/ha (médias 83,0, 91,4 e 85,1). Em altitude parecida com a de Araraquara (Ponta Porã) ficou na média; abaixo de 500 m rendeu bem menos' },
+  IGU: { r: [84.93/82.95, 92.41/91.42, 78.63/85.12],
+    src: 'Fundação MS (3 ensaios): Ponta Porã-MS em 3 safras, 84,9, 92,4 e 78,6 sc/ha (médias 83,0, 91,4 e 85,1)' }
 };
-VARIETIES.forEach(v => { const x = POT_IDX[v.id]; v.idx = x ? 1 + (x.raw - 1) / 2 : 1; v.potRef = Math.round(POT_BASE * v.idx); v.potSrc = x ? x.src : 'Sem ensaio regional público encontrado: usa a base de ' + POT_BASE + ' sc/ha'; v.potEst = !x; });
+VARIETIES.forEach(v => { const x = POT_IDX[v.id];
+  if (x){ const n = x.r.length, m = x.r.reduce((a, b) => a + b, 0) / n; v.idx = 1 + (m - 1) * n / (n + 1); v.potN = n; } else v.idx = 1;
+  v.potRef = Math.round(POT_BASE * v.idx); v.potSrc = x ? x.src : 'Sem ensaio público na região encontrado (buscado em nov/2026): usa a base de ' + POT_BASE + ' sc/ha'; v.potEst = !x; });
 VARIETIES.forEach(v => { if (VTEC[v.id]){ v.tec = v.tec || VTEC[v.id][0]; v.emp = v.emp || VTEC[v.id][1]; } });
 const R1_DAS = [55, 52, 48];
 function interp(xs, ys, t){
@@ -2768,7 +2777,7 @@ function run(inp){
   var potTouched = false;
   $('fPot').addEventListener('input', function(){ potTouched = true; potHintF(); });
   function potHintF(){ var v = VARIETIES[+$('fVar').value]; if (!v) return; var pv = parseFloat($('fPot').value);
-    $('fPotHint').textContent = 'Referência da '+v.nome.replace('Brasmax ','')+': '+v.potRef+' sc/ha ('+(v.potEst ? 'sem ensaio regional' : 'ensaio regional')+'). '+(pv && Math.round(pv) !== v.potRef ? 'Você está usando '+fmt(pv)+' sc/ha como produtividade desejada.' : 'Ajuste para a produtividade que você deseja ou espera nesta área.'); }
+    $('fPotHint').textContent = 'Referência da '+v.nome.replace('Brasmax ','')+': '+v.potRef+' sc/ha ('+(v.potEst ? 'sem ensaio regional' : v.potN+' ensaio'+(v.potN > 1 ? 's' : '')+' regional'+(v.potN > 1 ? 'is' : ''))+'). '+(pv && Math.round(pv) !== v.potRef ? 'Você está usando '+fmt(pv)+' sc/ha como produtividade desejada.' : 'Ajuste para a produtividade que você deseja ou espera nesta área.'); }
   function popHintF(){ var v = VARIETIES[+$('fVar').value]; if (!v) return; if (!potTouched) $('fPot').value = v.potRef; potHintF(); $('fPopHint').textContent = 'Faixa '+(v.popGen ? 'genérica' : 'da ficha')+' da '+v.nome.replace('Brasmax ','')+': '+v.pop[0]+' a '+v.pop[1]+' mil pl/ha. Em branco, uso o meio da faixa.'; }
   $('fVar').addEventListener('change', popHintF);
   $('fProj').addEventListener('change', function(){ var cur = +$('fVar').value; fillVar($('fProj').value, cur); $('fVar').value = String(cur); popHintF(); fillArea($('fProj').value, ''); });
