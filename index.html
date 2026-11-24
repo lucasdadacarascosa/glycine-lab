@@ -495,6 +495,7 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 .aico { display: inline-flex; width: 34px; height: 34px; border-radius: 10px; align-items: center; justify-content: center; background: color-mix(in srgb, var(--good) 14%, transparent); color: var(--good); flex: 0 0 auto; align-self: center; }
 .aico svg { width: 24px; height: 24px; }
 @media (prefers-reduced-motion: reduce) { .vin-f, .vin-b, .vin-0 { animation: none; } }
+.repl{margin-top:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card2,rgba(0,0,0,.03));font-size:13px;line-height:1.45}.repl .rsrc{display:block;margin-top:6px;font-size:11.5px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -667,7 +668,8 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   </fieldset>
   <fieldset class="vset"><legend>Perda de plantas depois da emergência</legend>
     <div class="frow"><label class="fl">Plantas perdidas (%)<input id="fVPerda" type="number" min="0" max="95" step="1" inputmode="numeric" placeholder="0"></label><label class="fl">Causa<select id="fVCausa"></select></label></div>
-    <div class="hint">Use quando não der para contar o estande: a estimativa de quantas plantas morreram desde a última visita (pragas, doença, animais, chuva forte…).</div>
+    <label class="fl">Como as plantas sumiram<select id="fVDist"><option value="0">Espalhadas na linha</option><option value="1">Em reboleiras ou faixas (buracos de mais de 30 cm)</option></select></label>
+    <div class="hint">A estimativa de quantas plantas morreram desde a última visita. A soja compensa bem até V2 e cada vez menos depois; buracos grandes compensam menos que perdas espalhadas.</div>
   </fieldset>
   <fieldset class="vset"><legend>Fitotoxicidade</legend>
     <div class="frow"><label class="fl">Intensidade<select id="fVFito"></select></label><label class="fl">Produto<select id="fVFitoP"></select></label></div>
@@ -734,6 +736,7 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
     </div>
     <div class="hcyc"><div class="hh"><span id="hCyc"></span><span id="hHarv"></span></div><div class="hsegs pict" id="hSegs" aria-hidden="true"></div><div class="hlab" id="hLab" aria-hidden="true" hidden></div></div>
     <div class="wcard" id="hWx"></div>
+    <div class="repl" id="replMain" hidden></div>
     <div class="risk" id="hRisk"></div>
     <div class="tiles ring3" id="hTiles"></div>
     <div class="hsplit" id="hSplit"></div>
@@ -798,6 +801,7 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
         <div class="label"><label for="fal">Falhas na linha</label><output id="falOut" class="num"></output></div>
         <input type="range" id="fal" min="0" max="40" step="1">
         <div class="hint" id="falHint"></div>
+        <div class="repl" id="replBox" hidden></div>
       </div>
       <div class="field">
         <div class="label"><label for="sowDate">Semeadura</label><output id="sowOut" class="num"></output></div>
@@ -1104,16 +1108,32 @@ const CLASSE = [ { nome: 'Baixo', m: 1.5 }, { nome: 'Médio', m: 1.0 }, { nome: 
 // Formulados de base (N-P2O5-K2O em %); KCl tem 60% de K2O.
 const FORMS = [ { n: 'Manual' }, { n: '5-25-25', N: 5, p: 25, k: 25 }, { n: '5-20-10', N: 5, p: 20, k: 10 }, { n: '4-30-10', N: 4, p: 30, k: 10 } ];
 function cover(dose, cls, exp){ const m = CLASSE[cls].m; return m === 0 ? 1 : Math.min(1, dose / (m * exp)); }
-// População: platô sem perda dentro da faixa da ficha (plasticidade da soja); perda fora dela e por falhas na linha. Coeficientes ilustrativos.
-// Perda de plantas depois da emergência: a parte que a ramificação não compensa cresce com a fase (ilustrativo).
-const LATE = [0, 0, 0.05, 0.1, 0.25, 0.35, 0.5, 0.6, 0.7, 0.5, 0.1];
+// População: platô sem perda dentro da faixa da ficha (plasticidade da soja); perda fora dela e por falhas na linha.
+// Abaixo da faixa: 0,4 × d² (d = fração abaixo do mínimo). Calibrado em Mississippi State (P3831): perder 50% do estande uniforme não
+// reduziu a produção, e com 75% de perda completar o estande rendeu só 12% mais. Acima da faixa e falhas: ver abaixo.
+// Perda de plantas depois da emergência. As plantas que sobram entram na curva de população (compensação plena, como se a lavoura
+// tivesse sido semeada com esse estande); LATE é a fração da produção das plantas perdidas que NÃO é compensada, por estádio:
+//  VE a V2: compensação plena (Univ. Minnesota: perda em VC e V3 dá a mesma resposta; Illinois: V3 e V6 quase iguais);
+//  V4-V6: compensação menor quando o estande fica baixo (Minnesota/Iowa State, PM 1851);
+//  R1-R5: a planta perdida leva as vagens; as vizinhas só ajustam grãos e peso (granizo: Minnesota e Embrapa Trigo);
+//  R6-R7: boa parte do grão já está formada (queda da fração perdida). Valores entre os pontos são interpolados por nós.
+const LATE = [0, 0, 0.05, 0.15, 0.30, 0.40, 0.55, 0.70, 0.80, 0.50, 0.10];
+// Perda concentrada em reboleiras ou faixas (falhas maiores que 30 cm): as vizinhas compensam menos. Embrapa Soja (CT 48):
+// cada 1% da linha em falhas tirou 0,5 a 0,8% da produção. Somamos metade da parte compensável como perda.
+const GAP_PEN = 0.5;
+// Causas de perda de plantas (ordem dos índices fixa: visitas antigas guardam o número). CAUSA_ORD é a ordem no formulário.
+const CAUSAS = ['Lagartas ou outras pragas','Doença (tombamento, podridão)','Animais ou pisoteio','Chuva forte ou granizo','Seca ou calor','Fitotoxicidade','Outra','Pombas ou outras aves','Encrostamento superficial','Erosão ou enxurrada','Envelopamento pela palha (plantio)'];
+const CAUSA_ORD = [7,0,8,9,10,1,2,3,4,5,6];
+// Replantio (Mississippi State, P3831): até 50% de perda com estande uniforme, manter; com 75%, completar com meia densidade
+// rendeu 12% mais; perda total, replantar cedo. Custo do replantio no Brasil: cerca de 2 a 7 sacas/ha (CNA, safra 2025/26).
+const REPL_COST = 5;
 // Fitotoxicidade: perda na fase da ocorrência e metade na seguinte; nas vegetativas iniciais a planta se recupera mais (ilustrativo).
 const FITO = [0, 0.04, 0.12, 0.30];
 const FITO_REC = [0.4, 0.4, 0.5, 0.7, 1, 1, 1, 1, 1, 1, 1];
 function popStress(inp){
   const v = VARIETIES[inp.vari], lo = v.pop[0], hi = v.pop[1], p = inp.pop, f = inp.fal || 0;
   const d = p < lo ? (lo - p) / lo : 0, e = p > hi ? (p - hi) / hi : 0;
-  const sLow = Math.min(0.35, 0.6 * Math.pow(d, 1.5)), sHigh = Math.min(0.10, 0.25 * e), sFal = Math.min(0.4, 0.5 * f / 100);
+  const sLow = Math.min(0.35, 0.4 * d * d), sHigh = Math.min(0.10, 0.25 * e), sFal = Math.min(0.4, 0.65 * f / 100);
   return { lo, hi, d, e, sLow, sHigh, sFal, s: 1 - (1 - sLow) * (1 - sHigh) * (1 - sFal) };
 }
 function nutri(inp){
@@ -1276,7 +1296,7 @@ function run(inp){
     while (ei < pev.length && ms >= pev[ei].ms){ const x = pev[ei++];
       if (x.pop != null && x.pop !== ''){ stand.pop = +x.pop; stand.mul = 1; }
       if (x.fal != null && x.fal !== '') stand.fal = +x.fal;
-      if (+x.perda > 0){ const l = Math.min(0.95, +x.perda / 100); stand.mul *= 1 - l; stand.late = 1 - (1 - stand.late) * (1 - l * LATE[si]); }
+      if (+x.perda > 0){ const l = Math.min(0.95, +x.perda / 100), u = LATE[si] + (x.dist ? GAP_PEN * (1 - LATE[si]) : 0); stand.mul *= 1 - l; stand.late = 1 - (1 - stand.late) * (1 - l * u); }
       if (+x.fito > 0){ const f = FITO[+x.fito] * FITO_REC[si]; fitoS[si] = Math.max(fitoS[si], f); if (si + 1 < STAGES.length) fitoS[si + 1] = Math.max(fitoS[si + 1], f / 2); }
       pchg = true;
     }
@@ -1440,6 +1460,27 @@ function run(inp){
   }
   chips('stageMode', ['Automático pela data','Manual'], function(i){ state.auto = (i===0); sel = null; });
   function offOf(v){ return Math.round((isoMs(v) - DAY0)/864e5); }
+  // Replantio: compara manter o estande atual com semear de novo hoje (mesma cultivar, estande planejado, sem as perdas registradas).
+  function replF(r){
+    var box = $('replBox'), lost = (state.vis || []).some(function(x){ return +x.perda > 0 || (x.pop != null && x.pop !== '' && +x.pop < state.pop * 0.9); });
+    if (!lost || !r.stand || safraFechada(curSafra) || (talhoes[curId] && talhoes[curId].colheita)){ box.hidden = true; $('replMain').hidden = true; return; }
+    var stg = state.stage, rem = r.stand.pop, plan = state.pop, loss = Math.max(0, 1 - rem / plan), ps = r.stand;
+    var gaps = (state.vis || []).some(function(x){ return +x.perda > 0 && x.dist; });
+    var h = '<b>Vale replantar?</b> ';
+    if (stg >= 3){ h += 'Não. Em '+STAGES[stg].k+' a janela de replantio já passou: uma nova semeadura cairia muito tarde e as plantas atuais já ocupam o espaço. Fica a perda calculada pelo modelo.'; }
+    else {
+      var off = Math.round((isoToMs(state.today) - DAY0) / 864e5);
+      var nv = Object.assign({}, state, { sow: off, sowA: off, sowB: null, vis: [], stage: 0, p0: 0, pop: plan, fal: state.fal });
+      var rn = run(nv), keep = r.yield, novo = rn.yield, ganho = novo - keep - REPL_COST;
+      h += 'Estande agora: <b class="num">'+fmt(rem)+' mil pl/ha</b> ('+fmt(loss*100,0)+'% abaixo do planejado). Mantendo: <b class="num">'+fmt(keep,1)+' sc/ha</b>. Replantando hoje: <b class="num">'+fmt(novo,1)+' sc/ha</b>, menos cerca de '+REPL_COST+' sc/ha de custo. ';
+      if (loss >= 0.9) h += '<b>Perda quase total: replantar tudo, o quanto antes.</b>';
+      else if (ganho > 0 && loss >= 0.6) h += '<b>Replantar compensa</b> (ganho estimado de '+fmt(ganho,1)+' sc/ha). '+(gaps ? 'Como a perda está em reboleiras ou faixas, replante só nesses trechos.' : 'Com o estande uniforme, completar a linha com 25 a 50% da densidade costuma bastar.');
+      else if (loss >= 0.6) h += '<b>No limite.</b> O ganho não paga o custo; se as falhas estiverem em reboleiras, replante só nelas.';
+      else h += '<b>Manter.</b> Com menos de 50 a 60% de perda e estande uniforme, a soja compensa e o replantio não costuma pagar.';
+    }
+    box.innerHTML = h + '<span class="rsrc">Base: Mississippi State (P3831), Univ. Minnesota e Embrapa Soja; custo do replantio pela CNA. Ajuste com seus dados de campo.</span>';
+    box.hidden = false; $('replMain').innerHTML = box.innerHTML; $('replMain').hidden = stg >= 3;
+  }
   $('sowDate').addEventListener('change', function(e){ if (!e.target.value) return; var r = sowRng(state), a = offOf(e.target.value); setSow(state, a, r[1] > r[0] && r[1] > a ? r[1] : null); sel = null; render(); });
   $('sowDateF').addEventListener('change', function(e){ var r = sowRng(state); setSow(state, r[0], e.target.value ? offOf(e.target.value) : null); sel = null; render(); });
   $('sow').addEventListener('input', function(e){ var r = sowRng(state), w = r[1] - r[0], a = parseFloat(e.target.value); setSow(state, a, w ? a + w : null); render(); });
@@ -1810,7 +1851,8 @@ function run(inp){
         : ps.e > 0 ? 'Acima da faixa: perda de '+fmt(ps.sHigh*100,1)+'% por competição entre plantas e risco de acamamento.'
         : 'Dentro da faixa: sem perda, a soja compensa com ramificação.')
       + (vv.popGen ? ' A faixa desta variedade não foi incluída; usei a recomendação geral de 200 a 300 mil.' : '');
-    $('falHint').textContent = state.fal > 0 ? 'Perda de '+fmt(ps.sFal*100,1)+'%: a ramificação compensa parte dos buracos, não todos (coeficiente ilustrativo).' : 'Sem falhas: estande uniforme.';
+    $('falHint').textContent = state.fal > 0 ? 'Perda de '+fmt(ps.sFal*100,1)+'%: a ramificação compensa parte dos buracos, não todos (Embrapa: cada 1% da linha em falhas maiores que 30 cm tira 0,5 a 0,8% da produção).' : 'Sem falhas: estande uniforme.';
+    try { replF(r); } catch(e){ $('replBox').hidden = true; $('replMain').hidden = true; }
     var L = r.lim, LN = { fert:'V%', p:'fósforo', k:'potássio', agua:'água', pop:'população', mei:'ambiente Meiosi' };
     var lfmt = function(x){ return x >= 130 ? '130+' : x < 40 ? 'abaixo de 40' : fmt(x); };
     var lk = Object.keys(L).sort(function(a,b){ return L[a]-L[b]; })[0], lv = L[lk];
@@ -2959,10 +3001,9 @@ function run(inp){
 
   // visitas
   $('fVSt').innerHTML = '<option value="">Não observado</option>' + STAGES.map(function(st, i){ return '<option value="'+i+'">'+st.k+'</option>'; }).join('');
-  var CAUSAS = ['Lagartas ou outras pragas','Doença (tombamento, podridão)','Animais ou pisoteio','Chuva forte ou granizo','Seca ou calor','Fitotoxicidade','Outra'];
   var FITO_N = ['Nenhuma','Leve: manchas ou amarelecimento leve','Moderada: encarquilhamento, bronzeamento','Severa: necrose, morte de ponteiros'];
   var FITO_P = ['Herbicida','Fungicida','Inseticida','Mistura ou outro'];
-  $('fVCausa').innerHTML = CAUSAS.map(function(n, i){ return '<option value="'+i+'">'+n+'</option>'; }).join('');
+  $('fVCausa').innerHTML = CAUSA_ORD.map(function(i){ return '<option value="'+i+'">'+CAUSAS[i]+'</option>'; }).join('');
   $('fVFito').innerHTML = FITO_N.map(function(n, i){ return '<option value="'+i+'">'+n+'</option>'; }).join('');
   $('fVFitoP').innerHTML = FITO_P.map(function(n, i){ return '<option value="'+i+'">'+n+'</option>'; }).join('');
   function num(id){ var v = String($(id).value).replace(',', '.').trim(); return v === '' ? null : parseFloat(v); }
@@ -2982,7 +3023,7 @@ function run(inp){
     $('fVData').value = state.today; $('fVData').max = state.today;
     $('fVChuva').value = ''; $('fVTmax').value = state.tmax; $('fVSt').value = ''; $('fVEv').value = String(state.clima || 0); $('fVWeed').value = String(state.weed);
     $('fVObs').value = ''; $('fVErr').textContent = '';
-    $('fVPm').value = ''; $('fVEsp').value = (talhoes[curId] && talhoes[curId].esp) || 50; $('fVFal').value = ''; $('fVPerda').value = ''; $('fVCausa').value = '0'; $('fVFito').value = '0'; $('fVFitoP').value = '0'; vPopH();
+    $('fVPm').value = ''; $('fVEsp').value = (talhoes[curId] && talhoes[curId].esp) || 50; $('fVFal').value = ''; $('fVPerda').value = ''; $('fVCausa').value = '7'; $('fVDist').value = '0'; $('fVFito').value = '0'; $('fVFitoP').value = '0'; vPopH();
     var sib = siblings(curId); $('fVAllL').hidden = !sib.length; $('fVAll').checked = true;
     $('fVAllT').textContent = 'Registrar também '+(sib.length === 1 ? 'no outro talhão' : 'nos outros '+sib.length+' talhões')+' da área (chuva, temperatura, eventos, plantas daninhas e fitotoxicidade valem para a área; estande e perda de plantas ficam só neste talhão)';
     vPer(); $('dlgV').hidden = false; $('fVChuva').focus();
@@ -2998,7 +3039,7 @@ function run(inp){
     var v = { d: d, chuva: chuva, tmax: tmax, clima: +$('fVEv').value, weed: +$('fVWeed').value, obs: $('fVObs').value.trim(), criado: new Date().toISOString() };
     if (pc != null){ v.pop = Math.round(pc); v.pm = num('fVPm'); v.esp = num('fVEsp'); }
     if (fl != null) v.fal = fl;
-    if (pd > 0){ v.perda = pd; v.causa = +$('fVCausa').value; }
+    if (pd > 0){ v.perda = pd; v.causa = +$('fVCausa').value; if ($('fVDist').value === '1') v.dist = 1; }
     if (+$('fVFito').value > 0){ v.fito = +$('fVFito').value; v.fitoP = +$('fVFitoP').value; }
     var stv = $('fVSt').value; if (stv !== '') v.st = +stv;
     saveNow();
@@ -3025,7 +3066,7 @@ function run(inp){
       var bits = [(v.chuva == null || v.chuva === '' ? 'chuva da Open-Meteo' : fmt(+v.chuva || 0)+' mm em '+n+(n === 1 ? ' dia' : ' dias')), 'máx. '+fmt(+v.tmax, 1)+' °C'];
       if (v.pop != null) bits.push('estande '+fmt(v.pop)+' mil/ha'+(v.pm != null ? ' ('+fmt(v.pm,1)+' pl/m a '+fmt(v.esp)+' cm)' : ''));
       if (v.fal != null) bits.push(fmt(v.fal)+'% de falhas');
-      if (+v.perda > 0) bits.push('perda de '+fmt(v.perda)+'% das plantas'+(v.causa != null ? ' ('+CAUSAS[v.causa].toLowerCase()+')' : ''));
+      if (+v.perda > 0) bits.push('perda de '+fmt(v.perda)+'% das plantas'+(v.causa != null ? ' ('+CAUSAS[v.causa].toLowerCase()+(v.dist ? ', em reboleiras' : '')+')' : ''));
       if (+v.fito > 0) bits.push('fitotoxicidade '+FITO_N[v.fito].split(':')[0].toLowerCase()+(v.fitoP != null ? ' ('+FITO_P[v.fitoP].toLowerCase()+')' : ''));
       if (+v.clima) bits.push(OPTS.clima[+v.clima].toLowerCase());
       bits.push('daninhas: '+OPTS.weed[+v.weed || 0].toLowerCase());
