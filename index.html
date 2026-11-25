@@ -496,6 +496,15 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 .aico svg { width: 24px; height: 24px; }
 @media (prefers-reduced-motion: reduce) { .vin-f, .vin-b, .vin-0 { animation: none; } }
 .repl{margin-top:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card2,rgba(0,0,0,.03));font-size:13px;line-height:1.45}.repl .rsrc{display:block;margin-top:6px;font-size:11.5px;color:var(--muted)}
+.pfilt{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 2px}.pfilt:empty{display:none}
+.pfilt button{font:inherit;font-size:13px;padding:6px 12px;min-height:34px;border-radius:999px;border:1px solid var(--line);background:transparent;color:inherit;cursor:pointer}
+.pfilt button[aria-pressed="true"]{background:var(--ink,#123321);color:var(--bg,#fff);border-color:transparent}
+.tlist{display:grid;gap:6px;margin-top:4px}
+.trow{display:flex;align-items:center;gap:10px;padding:9px 10px 9px 12px;border-radius:12px;border:1px solid var(--line);border-left:4px solid var(--good);text-decoration:none;color:inherit}
+.trow.state-warn{border-left-color:var(--warn)}.trow.state-crit{border-left-color:var(--crit)}
+.trow .tl{flex:1 1 auto;min-width:0;display:grid;gap:1px}.trow .tl b{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow .tl span{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.trow .tl .tx.late{color:var(--warn)}
+.trow .tr{text-align:right;display:grid;flex:0 0 auto}.trow .tr b{font-size:17px}.trow .tr span{font-size:11.5px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -518,7 +527,7 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   <div class="clist" id="sList"></div>
   <a href="#desempenho" class="ccard dlink" style="margin-top:12px"><span><h2>Desempenho e histórico</h2><span class="cs" id="sDesSub">Precisão do modelo, cultivares, áreas e manejo</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></a>
   <button type="button" class="newp" id="newS" style="margin-top:12px">+ Nova safra</button>
-  <p class="note" style="margin-top:14px">Os projetos (fazendas) e as áreas são permanentes e valem para todas as safras. Os talhões são de cada safra: ao abrir uma safra nova, dá para copiar os talhões da anterior (nome, tamanho, área e localização) e preencher só cultivar, semeadura e manejo.</p>
+  <p class="note" style="margin-top:14px">As fazendas são permanentes e valem para todas as safras. Os talhões são de cada safra: ao abrir uma safra nova, dá para copiar os talhões da anterior (nome, tamanho, área e localização) e preencher só cultivar, semeadura e manejo.</p>
 </div>
 
 <div class="lv" id="viewDes" hidden>
@@ -554,24 +563,25 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   <label class="fl">Ano de início<input id="fSAno" type="number" min="2020" max="2100" step="1" inputmode="numeric"></label>
   <div class="hint" id="fSNome"></div>
   <label class="fchk"><input type="checkbox" id="fSCopy" checked> <span id="fSCopyT">Copiar os talhões da safra atual</span></label>
-  <div class="hint">Copia nome, tamanho, área, projeto, localização, solo e adubação. Cultivar, semeadura, estande e visitas começam do zero.</div>
+  <div class="hint">Copia nome, tamanho, fazenda, localização, solo e adubação. Cultivar, semeadura, estande e visitas começam do zero.</div>
   <p class="ferr" id="fSErr" role="alert"></p>
   <div class="fbtn"><button type="button" class="btn ghost" id="fSCancel">Cancelar</button><button type="submit" class="btn">Criar safra</button></div>
 </form></div>
 
 <div class="lv" id="viewProj" hidden>
   <a href="#safras" class="sback" id="pSafraLink"></a>
-  <div class="lhead"><div><h1>Projetos</h1><div class="sub" id="pSum">Potencial da soja, talhão a talhão</div></div></div>
+  <div class="lhead"><div><h1>Fazendas</h1><div class="sub" id="pSum">Potencial da soja, talhão a talhão</div></div></div>
   <div class="sync" id="pSync" style="margin-top:6px"></div>
+  <div class="pfilt" id="pFilt" role="group" aria-label="Filtrar por cultivar"></div>
   <div class="cards" id="pCards"></div>
-  <button type="button" class="newp" id="newP" style="margin-top:12px">+ Novo projeto</button>
+  <button type="button" class="newp" id="newP" style="margin-top:12px">+ Nova fazenda</button>
   <a href="#safras" class="ccard dlink" id="pClose" style="margin-top:12px"><span><h2 id="pCloseT">Encerrar a safra</h2><span class="cs" id="pCloseS">Registre as colheitas e feche o experimento na tela Safras</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></a>
 </div>
 
 <div class="lv" id="viewAnd" hidden>
-  <div class="lhead"><div><h1>Andamento</h1><div class="sub">Todos os talhões, de todos os projetos</div></div></div>
+  <div class="lhead"><div><h1>Andamento</h1><div class="sub">Todos os talhões, de todas as fazendas</div></div></div>
   <div class="andctl">
-    <div class="sortp" id="gandBy"><button type="button" data-v="talhao">Talhão</button><button type="button" data-v="area">Área</button><button type="button" data-v="variedade">Variedade</button></div>
+    <div class="sortp" id="gandBy"><button type="button" data-v="talhao">Talhão</button><button type="button" data-v="area">Fazenda</button><button type="button" data-v="variedade">Variedade</button></div>
     <div class="sortp" id="gandSort"><button type="button" data-v="fase">Fase</button><button type="button" data-v="prod">Produtividade</button></div>
   </div>
   <p class="note" id="gandNote" style="margin:10px 0"></p>
@@ -579,16 +589,16 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 </div>
 
 <div class="lv" id="viewVar" hidden>
-  <div class="lhead"><div><h1>Variedades</h1><div class="sub">Quais cultivares estamos usando, em todos os projetos</div></div></div>
+  <div class="lhead"><div><h1>Variedades</h1><div class="sub">Quais cultivares estamos usando, em todas as fazendas</div></div></div>
   <div id="vMode"></div>
   <div class="clist" id="vList"></div>
-  <p class="note" style="margin-top:14px">Tela só de consulta. Ciclos marcados como estimados vêm do grupo de maturação, sem ensaio próprio na região. Para usar uma cultivar num projeto, marque-a em Editar projeto.</p>
+  <p class="note" style="margin-top:14px">Tela só de consulta. Ciclos marcados como estimados vêm do grupo de maturação, sem ensaio próprio na região.</p>
 </div>
 
 <div class="lv" id="viewClima" hidden>
-  <div class="lhead"><div><h1>Clima</h1><div class="sub">Dados diários da Open-Meteo por área</div></div></div>
+  <div class="lhead"><div><h1>Clima</h1><div class="sub">Dados diários da Open-Meteo e do pluviômetro, por local</div></div></div>
   <div class="clist" id="cList"></div>
-  <p class="note" style="margin-top:14px">O clima importado vale para todos os talhões da área. Importe de novo de tempos em tempos (a cada visita ou uma vez por semana) para trazer a chuva que caiu e a previsão nova.</p>
+  <p class="note" style="margin-top:14px">O clima é buscado sozinho e vale para todos os talhões a até 2 km uns dos outros. Importe de novo de tempos em tempos (a cada visita ou uma vez por semana) para trazer a chuva que caiu e a previsão nova.</p>
 </div>
 
 <div class="lv" id="viewAj" hidden>
@@ -596,7 +606,7 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   <div class="aj">
     <div class="ccard"><h2>Tema</h2><div class="cs">O tema escuro ajuda a ler no sol da lavoura.</div><div class="seg" id="ajTema"><button type="button" data-v="">Automático</button><button type="button" data-v="light">Claro</button><button type="button" data-v="dark">Escuro</button></div></div>
     <div class="ccard"><h2>Abertura</h2><div class="cs">A animação do logo aparece sempre que o app é aberto. Um toque nela pula a animação.</div><div class="seg" id="ajSplash"><button type="button" data-v="1">Mostrar</button><button type="button" data-v="0">Não mostrar</button></div><button type="button" class="btn ghost" id="ajVer">Ver a abertura agora</button></div>
-    <div class="ccard" id="bkCard"><h2>Backup dos dados</h2><div class="cs">Exporta todas as safras, projetos, áreas, talhões, visitas, colheitas e clima num arquivo. Importar junta o arquivo aos dados atuais (registros com o mesmo código são substituídos pelos do arquivo).</div>
+    <div class="ccard" id="bkCard"><h2>Backup dos dados</h2><div class="cs">Exporta todas as safras, fazendas, áreas, talhões, visitas, colheitas e clima num arquivo. Importar junta o arquivo aos dados atuais (registros com o mesmo código são substituídos pelos do arquivo).</div>
       <div class="sfoot"><button type="button" class="btn ghost" id="bkExp">Exportar backup</button><button type="button" class="btn ghost" id="bkImpB">Importar backup</button><input type="file" id="bkImp" accept="application/json,.json" hidden></div><div class="cs" id="bkMsg" role="status"></div></div>
     <div class="ccard"><h2>Conta</h2><div class="cs">Dados sincronizados pelo Firebase quando você está conectado.</div><button type="button" class="btn ghost" onclick="window.glLogout && window.glLogout()">Sair da conta</button></div>
     <div class="ccard"><h2>Sobre o modelo</h2><div class="cs">Protótipo de uso pessoal. Os coeficientes de perda são ilustrativos e não foram calibrados; os ciclos seguem as fichas das cultivares e o ensaio de Fernandópolis-SP. Use os números para ver o comportamento do modelo, não para decidir manejo. Clima diário: Open-Meteo, gratuito para uso não comercial.</div></div>
@@ -604,7 +614,7 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 </div>
 
 <nav class="bnav" id="bnav" aria-label="Navegação principal" hidden>
-  <a href="#projetos" data-v="viewProj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4zM3 12l9 4 9-4M3 17l9 4 9-4"/></svg>Projetos</a>
+  <a href="#projetos" data-v="viewProj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4zM3 12l9 4 9-4M3 17l9 4 9-4"/></svg>Fazendas</a>
   <a href="#andamento" data-v="viewAnd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h6"/></svg>Andamento</a>
   <a href="#variedades" data-v="viewVar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V8M12 12c-3.5 0-6-2.5-6-6 3.5 0 6 2.5 6 6zM12 15c3.5 0 6-2.5 6-6-3.5 0-6 2.5-6 6z"/></svg>Variedades</a>
   <a href="#clima" data-v="viewClima"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 16a4 4 0 1 1 1-7.9A5 5 0 0 1 18 9a3.5 3.5 0 0 1 0 7zM9 19v2M13 19v2"/></svg>Clima</a>
@@ -612,15 +622,15 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 </nav>
 
 <div class="lv" id="viewList" hidden>
-  <div class="tbar"><button type="button" class="back" id="toProj">← Projetos</button><div class="tact"><button type="button" class="btn ghost" id="pEdit">Editar</button><button type="button" class="btn ghost danger" id="pDel">Excluir</button></div></div>
-  <div class="lhead"><div><h1 id="lName">Projeto</h1><div class="sub" id="lSub"></div></div><div class="tact"><button type="button" class="btn ghost" id="newA">+ Área</button><button type="button" class="btn" id="newT">+ Talhão</button></div></div>
+  <div class="tbar"><button type="button" class="back" id="toProj">← Fazendas</button><div class="tact"><button type="button" class="btn ghost" id="pEdit">Editar</button><button type="button" class="btn ghost danger" id="pDel">Excluir</button></div></div>
+  <div class="lhead"><div><h1 id="lName">Fazenda</h1><div class="sub" id="lSub"></div></div><div class="tact"><button type="button" class="btn ghost" id="newA" hidden>+ Área</button><button type="button" class="btn" id="newT">+ Talhão</button></div></div>
   <div class="ltot" id="lTot"></div>
   <div class="tabs" id="tabs" role="tablist"><button type="button" role="tab" data-tab="talhoes">Talhões</button><button type="button" role="tab" data-tab="andamento">Andamento</button><button type="button" role="tab" data-tab="comparativo">Comparativo</button></div>
   <div class="sync" id="lSync"></div>
   <section id="secTal"><div id="cards"></div></section>
   <section id="secAnd" hidden>
     <div class="andctl">
-      <div class="seg sub" id="andBy"><button type="button" data-v="talhao">Por talhão</button><button type="button" data-v="area">Por área</button><button type="button" data-v="variedade">Por variedade</button></div>
+      <div class="seg sub" id="andBy"><button type="button" data-v="talhao">Por talhão</button><button type="button" data-v="area" hidden>Por área</button><button type="button" data-v="variedade">Por variedade</button></div>
       <div class="seg sub" id="andSort"><button type="button" data-v="fase">Fase do ciclo</button><button type="button" data-v="prod">Produtividade</button></div>
     </div>
     <p class="note" id="andNote" style="margin:8px 0 10px"></p>
@@ -628,7 +638,7 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   </section>
   <section class="rank" id="rankSec" hidden>
     <h2>Ranking de cultivares</h2>
-    <p class="note" style="margin:4px 0 12px">Cada cultivar do projeto é simulada em todos os talhões dele, com as mesmas condições de solo, manejo e clima de cada um, e a média é ponderada pela área. Assim a comparação não depende de qual variedade foi plantada em qual talhão. O ranking muda à medida que as condições dos talhões são atualizadas.</p>
+    <p class="note" style="margin:4px 0 12px">Cada cultivar do banco é simulada em todos os talhões dele, com as mesmas condições de solo, manejo e clima de cada um, e a média é ponderada pela área. Assim a comparação não depende de qual variedade foi plantada em qual talhão. O ranking muda à medida que as condições dos talhões são atualizadas.</p>
     <label class="fl" id="rScopeL" style="max-width:360px;margin-bottom:12px">Comparar<select id="rScope"></select></label>
     <div class="rlist" id="rList"></div>
     <div class="panel" style="margin-top:12px"><h3 style="font-size:16px;margin-bottom:8px">Perda por fator, em pontos percentuais do potencial</h3><div style="overflow-x:auto"><table class="req" id="rTab" style="margin-top:0"></table></div>
@@ -637,11 +647,11 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 </div>
 
 <div class="dlg" id="dlgP" hidden><form class="dbox" id="fP" novalidate>
-  <h2 id="fPTitle">Novo projeto</h2>
-  <label class="fl">Nome<input id="fPNome" maxlength="60" autocomplete="off" placeholder="Ex.: Ensaio Meiosi x Plantio direto"></label>
+  <h2 id="fPTitle">Nova fazenda</h2>
+  <label class="fl">Nome<input id="fPNome" maxlength="60" autocomplete="off" placeholder="Ex.: Fazenda São Lourenço"></label>
   <input id="fPSafra" type="hidden"><div class="frow"><label class="fl">Sistema padrão<select id="fPSis"></select></label></div>
-  <fieldset class="fl" style="border:0;padding:0;margin:0"><legend style="padding:0;margin-bottom:4px">Cultivares do projeto</legend><div id="fPCult" style="display:grid;gap:2px"></div></fieldset>
-  <div class="hint" style="margin-top:-6px">Os talhões do projeto só oferecem estas cultivares, e cada uma já traz ciclo, faixa de população e exigências da ficha.</div>
+  <fieldset class="fl" hidden style="border:0;padding:0;margin:0"><legend style="padding:0;margin-bottom:4px">Cultivares do projeto</legend><div id="fPCult" style="display:grid;gap:2px"></div></fieldset>
+  <div class="hint" style="margin-top:-6px">A fazenda só agrupa os talhões. A cultivar, a localização e o solo são escolhidos em cada talhão.</div>
   <p class="ferr" id="fPErr" role="alert"></p>
   <div class="fbtn"><button type="button" class="btn ghost" id="fPCancel">Cancelar</button><button type="submit" class="btn">Salvar</button></div>
 </form></div>
@@ -700,8 +710,8 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   <div class="frow"><label class="fl">Área (ha)<input id="fArea" type="number" min="0.1" step="0.1" inputmode="decimal"></label><label class="fl">Altitude (m)<input id="fAlt" type="number" step="1" inputmode="numeric"></label></div>
   <label class="fl">Coordenadas (latitude, longitude)<input id="fCoord" placeholder="-21.7946, -48.1766" autocomplete="off"></label>
   <div class="hint" style="margin-top:-6px">Copie do Google Maps (toque e segure no ponto). O GPS do aparelho não funciona dentro da página.</div>
-  <label class="fl" id="fProjL">Projeto<select id="fProj"></select></label>
-  <label class="fl">Área<select id="fAreaSel"></select></label>
+  <label class="fl" id="fProjL">Fazenda<select id="fProj"></select></label>
+  <label class="fl" hidden>Área<select id="fAreaSel"></select></label>
   <div class="hint" style="margin-top:-6px" id="fAreaHint"></div>
   <label class="fl">Cultivar<select id="fVar"></select></label>
   <div class="frow"><label class="fl">Início da semeadura<input id="fSow" type="date" min="2026-09-15" max="2026-12-31"></label><label class="fl">Fim (se levou mais de um dia)<input id="fSowF" type="date" min="2026-09-15" max="2026-12-31"></label></div>
@@ -718,7 +728,7 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   <div class="top">
     <div class="tbar"><button type="button" class="back" id="toList">← Talhões</button><span class="sync" id="syncNote"></span></div>
     <div class="thead"><div><h1 class="tname" id="tName">Talhão</h1><div class="tmeta" id="tMeta"></div></div>
-      <div class="tact"><button type="button" class="btn ghost icon" hidden id="themeBtn" aria-label="Modo campo: tema escuro" aria-pressed="false"></button><button type="button" class="btn ghost" id="tEdit">Editar</button><button type="button" class="btn ghost danger" id="tDel">Excluir</button></div></div>
+      <div class="tact"><button type="button" class="btn ghost icon" hidden id="themeBtn" aria-label="Modo campo: tema escuro" aria-pressed="false"></button><button type="button" class="btn ghost" id="tDup">Duplicar</button><button type="button" class="btn ghost" id="tEdit">Editar</button><button type="button" class="btn ghost danger" id="tDel">Excluir</button></div></div>
   </div>
 
   <section class="hud" id="hud">
@@ -2006,13 +2016,15 @@ function run(inp){
   function delA(id){ delete areas[id]; return write('areas', id, null); }
   // dados diários automáticos (Open-Meteo), gravados pela tarefa agendada: um documento por área ou por talhão avulso
   // Chuva do pluviômetro (registro rápido) substitui a chuva da Open-Meteo naquele dia
-  function wxFor(id){ var t = talhoes[id]; if (!t) return null; var c = clima[areaOf(t) || id] || clima[id]; if (!c || (!c.d && !c.p)) return null;
-    if (!c.p) return c.d; var d = Object.assign({}, c.d || {});
+  function wxFor(id){ var t = talhoes[id]; if (!t) return null; var c = clima[wxKey(id)] || clima[id]; if (!c || (!c.d && !c.p)) return null;
+    var pp = {}; wxGroup(id).concat([wxKey(id)]).forEach(function(k){ if (clima[k] && clima[k].p) Object.assign(pp, clima[k].p); }); if (c.p) Object.assign(pp, c.p);
+    if (!Object.keys(pp).length) return c.d; var d = Object.assign({}, c.d || {});
+    c = { p: pp };
     Object.keys(c.p).forEach(function(k){ var o = d[k] ? d[k].slice() : [null, null, null, null, 0]; o[0] = +c.p[k]; o[4] = 0; o[5] = 'p'; d[k] = o; });
     return d; }
   function wxInfo(id){ var t = talhoes[id]; if (!t) return null; return clima[areaOf(t) || id] || clima[id] || null; }
   function areaOf(t){ return t && t.areaId && areas[t.areaId] ? t.areaId : null; }
-  function siblings(id){ var a = areaOf(talhoes[id]); return a ? Object.keys(talhoes).filter(function(k){ return k !== id && talhoes[k].areaId === a; }) : []; }
+  function siblings(id){ var t = talhoes[id]; if (!t) return []; var a = areaOf(t); if (a) return Object.keys(talhoes).filter(function(k){ return k !== id && talhoes[k].areaId === a; }); return wxGroup(id).filter(function(k){ return k !== id && talhoes[k] && !areaOf(talhoes[k]); }); }
   function areaTalhoes(aid){ return Object.keys(talhoes).filter(function(k){ return talhoes[k].areaId === aid; }); }
   function areasOf(pid){ return Object.keys(areas).filter(function(a){ return (areas[a].proj || SEM) === pid; }).sort(function(a,b){ return String(areas[a].nome).localeCompare(String(areas[b].nome), 'pt-BR'); }); }
   function shareTo(sib, inputs, sc){
@@ -2047,8 +2059,9 @@ function run(inp){
     if (Object.keys(talhoes).some(function(id){ return projOf(talhoes[id]) === SEM; })) ids.push(SEM);
     return ids;
   }
-  function projData(pid){ return pid === SEM ? { nome: 'Talhões sem projeto', safra: '', sistema: null, cult: VARIETIES.map(function(v,i){ return i; }) } : projetos[pid]; }
-  function projCult(pid){ var p = projData(pid); return p && p.cult && p.cult.length ? p.cult.filter(function(i){ return VARIETIES[i]; }) : VARIETIES.map(function(v,i){ return i; }); }
+  function projData(pid){ return pid === SEM ? { nome: 'Talhões sem fazenda', safra: '', sistema: null, cult: VARIETIES.map(function(v,i){ return i; }) } : projetos[pid]; }
+  // Qualquer cultivar do banco pode ir em qualquer talhão (a fazenda não limita mais).
+  function projCult(pid){ return VARIETIES.map(function(v,i){ return i; }); }
   function talhoesOf(pid){ return Object.keys(talhoes).filter(function(id){ return projOf(talhoes[id]) === pid; }).sort(function(a,b){ return String(talhoes[a].nome).localeCompare(String(talhoes[b].nome), 'pt-BR'); }); }
   function shortV(vi){ return VARIETIES[vi].nome.replace('Brasmax ','').replace('Pioneer ','').replace(' CE','').replace(' IPRO',''); }
 
@@ -2212,6 +2225,8 @@ function run(inp){
   }
 
   // tela 1: projetos
+  var pFilt = 'all';
+  document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('#pFilt [data-f]'); if (!b) return; pFilt = b.dataset.f; renderProjects(); });
   function renderProjects(){ try { updBadge(); } catch(e){}
     autoWx(null, function(){ try { updBadge(); } catch(e){} });
     (function(){ var ids = Object.keys(talhoes), nC = ids.filter(function(k){ return talhoes[k].colheita; }).length, fe = safraFechada(curSafra);
@@ -2220,31 +2235,36 @@ function run(inp){
       $('pClose').hidden = !ids.length && !fe; })();
     $('pSafraLink').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Safra '+safraNome(curSafra)+(safraFechada(curSafra) ? ' · encerrada' : '');
     var ids = projIds();
-    if (mode === 'carregando' && !ids.length){ $('pCards').innerHTML = '<div class="empty"><p>Carregando projetos…</p></div>'; return; }
+    if (mode === 'carregando' && !ids.length){ $('pCards').innerHTML = '<div class="empty"><p>Carregando fazendas…</p></div>'; return; }
     if (!ids.length){
-      $('pCards').innerHTML = '<div class="empty"><p>Nenhum projeto ainda. Comece criando um projeto: nome, safra, sistema e as cultivares que vão entrar nele.</p><button type="button" class="btn" id="newP2">+ Novo projeto</button></div>';
+      $('pCards').innerHTML = '<div class="empty"><p>Nenhuma fazenda ainda. Comece criando uma fazenda: o nome e o sistema de manejo mais usado nela.</p><button type="button" class="btn" id="newP2">+ Nova fazenda</button></div>';
       $('newP2').addEventListener('click', function(){ openPForm(null); });
       return;
     }
-    var allA = 0, allP = 0;
+    var allA = 0, allP = 0, usedV = [];
+    Object.keys(talhoes).forEach(function(k){ var vi = +talhoes[k].inputs.vari; if (usedV.indexOf(vi) < 0) usedV.push(vi); });
+    if (pFilt !== 'all' && usedV.indexOf(+pFilt) < 0) pFilt = 'all';
+    $('pFilt').innerHTML = usedV.length > 1 ? [['all','Todas']].concat(usedV.sort(function(a, b){ return a - b; }).map(function(vi){ return [String(vi), shortV(vi)]; })).map(function(o){ return '<button type="button" data-f="'+o[0]+'" aria-pressed="'+(String(pFilt) === o[0])+'">'+esc(o[1])+'</button>'; }).join('') : '';
     $('pCards').innerHTML = ids.map(function(pid){
       var p = projData(pid), tids = talhoesOf(pid), o = tot(tids), ret = o.pot ? o.prod/o.pot*100 : 0;
       allA += o.area; allP += o.prod;
       var ar = areasOf(pid), nA = ar.filter(function(a){ return tids.some(function(k){ return talhoes[k].areaId === a; }); }).length;
-      var tile = function(k){ var t = talhoes[k], e = evalT(t), rt = e.r.retained*100, lv = lvl(rt);
-        return '<a class="state-'+lv+'" href="#t-'+esc(k)+'" style="flex:'+Math.max(1, +t.area || 1)+' 1 0" aria-label="'+esc(t.nome)+': '+fmt(rt,0)+'% do potencial"><b>'+esc(shortV(e.s.vari))+'</b><span class="num">'+fmt(rt,0)+'%</span></a>'; };
-      var rows = ar.map(function(a){ var ts = tids.filter(function(k){ return talhoes[k].areaId === a; });
-        return '<div class="mr"><span class="mn" title="'+esc(areas[a].nome)+'">'+esc(areas[a].nome)+'</span><div class="mts">'+(ts.length ? ts.map(tile).join('') : '<span class="none">sem talhões</span>')+'</div></div>'; });
-      var solo = tids.filter(function(k){ return !areaOf(talhoes[k]); });
-      if (solo.length) rows.push('<div class="mr"><span class="mn">'+(ar.length ? 'Avulsos' : 'Talhões')+'</span><div class="mts">'+solo.map(tile).join('')+'</div></div>');
+      var row = function(k){ var t = talhoes[k], e = evalT(t), rt = e.r.retained*100, lv = lvl(rt), st = e.s.stage, lastV = (t.visitas || []).reduce(function(m, x){ return Math.max(m, isoToMs(x.d)); }, 0),
+          dsow = Math.round((isoToMs(state.today) - (DAY0 + sowRng(e.s)[0] * 864e5)) / 864e5), dv = lastV ? Math.round((isoToMs(state.today) - lastV) / 864e5) : null,
+          nxt = t.colheita ? 'colhido · '+fmt(+t.colheita.sc,1)+' sc/ha' : dsow < 0 ? 'semeadura em '+(-dsow)+(dsow === -1 ? ' dia' : ' dias') : dv == null ? 'sem visita ainda' : dv >= 10 ? 'última visita há '+dv+' dias' : dv === 0 ? 'visitado hoje' : 'visita há '+dv+(dv === 1 ? ' dia' : ' dias');
+        return '<a class="trow state-'+lv+'" href="#t-'+esc(k)+'"><span class="tl"><b>'+esc(t.nome)+'</b><span>'+esc(shortV(e.s.vari))+' · '+(dsow < 0 ? 'a semear' : t.colheita ? 'colhido' : STAGES[st].k)+' · '+fmt(+t.area || 0, 1)+' ha</span><span class="tx'+(dv != null && dv >= 10 && !t.colheita ? ' late' : '')+'">'+nxt+'</span></span><span class="tr"><b class="num">'+fmt(rt,0)+'%</b><span>'+fmt(e.r.yield,1)+' sc/ha</span></span></a>'; };
+      var shown = tids.filter(function(k){ return pFilt === 'all' || +talhoes[k].inputs.vari === +pFilt; });
+      if (pFilt !== 'all' && !shown.length) return '';
+      var rows = shown.map(row);
+      var nA = 0;
       var meta = [nA ? nA+(nA === 1 ? ' área' : ' áreas') : '', tids.length+(tids.length === 1 ? ' talhão' : ' talhões')].filter(Boolean).join(' · ');
       return '<div class="card pcard">'
         + '<a class="plink" href="#p-'+esc(pid)+'"><span><h2>'+esc(p.nome)+'</h2><span class="cmeta">'+meta+'</span></span>'
         + (tids.length ? '<span class="pr"><b class="num">'+fmt(o.area ? o.prod/o.area : 0,1)+'</b><span>sc/ha · '+fmt(ret,0)+'%</span></span>' : '')+'</a>'
-        + (tids.length ? '<div class="pmap"><div class="mt">Mapa das áreas</div>'+rows.join('')+'</div>' : '<div class="pnone">Sem talhões ainda. Toque no nome para abrir o projeto e cadastrar áreas e talhões.</div>')
+        + (tids.length ? '<div class="tlist">'+rows.join('')+'</div>' : '<div class="pnone">Sem talhões ainda. Toque no nome da fazenda para cadastrar talhões.</div>')
         + '</div>';
     }).join('') + (allA ? '<div class="pleg"><span><i style="background:var(--good)"></i>preservado</span><span><i style="background:var(--warn)"></i>atenção</span><span><i style="background:var(--crit)"></i>risco</span></div>' : '');
-    $('pSum').textContent = ids.length+(ids.length === 1 ? ' projeto' : ' projetos')+(allA ? ' · '+fmt(allA,0)+' ha · '+fmt(allP,0)+' sc projetadas' : '');
+    $('pSum').textContent = ids.length+(ids.length === 1 ? ' fazenda' : ' fazendas')+(allA ? ' · '+fmt(allA,0)+' ha · '+fmt(allP,0)+' sc projetadas' : '');
   }
 
   // tela 2: projeto, com abas
@@ -2253,7 +2273,8 @@ function run(inp){
     var ids = talhoesOf(pid);
     $('lName').textContent = p.nome;
     var sis = p.sistema != null && MANEJOS[p.sistema] ? MANEJOS[p.sistema].n : '';
-    $('lSub').textContent = [p.safra, sis, projCult(pid).map(shortV).join(', ')].filter(Boolean).join(' · ');
+    var usedV = []; ids.forEach(function(k){ var vi = +talhoes[k].inputs.vari; if (usedV.indexOf(vi) < 0) usedV.push(vi); });
+    $('lSub').textContent = [sis, usedV.map(shortV).join(', ')].filter(Boolean).join(' · ');
     $('pEdit').hidden = pid === SEM; $('pDel').hidden = pid === SEM;
     Array.prototype.forEach.call($('tabs').children, function(b){ b.setAttribute('aria-selected', String(b.dataset.tab === curTab)); });
     $('secTal').hidden = curTab !== 'talhoes'; $('secAnd').hidden = curTab !== 'andamento'; $('rankSec').hidden = curTab !== 'comparativo';
@@ -2267,7 +2288,7 @@ function run(inp){
     if (curTab === 'talhoes') renderTalhoes(ids);
     else if (curTab === 'andamento') renderAndamento(ids);
     else {
-      var opts = [['proj','Projeto inteiro']].concat(areasOf(pid).filter(function(a){ return areaTalhoes(a).length; }).map(function(a){ return [a, 'Dentro da área '+areas[a].nome]; }));
+      var opts = [['proj','Fazenda inteira']].concat(areasOf(pid).filter(function(a){ return areaTalhoes(a).length; }).map(function(a){ return [a, 'Dentro da área '+areas[a].nome]; }));
       if (!opts.some(function(o){ return o[0] === rScope; })) rScope = 'proj';
       $('rScope').innerHTML = opts.map(function(o){ return '<option value="'+esc(o[0])+'">'+esc(o[1])+'</option>'; }).join('');
       $('rScope').value = rScope; $('rScopeL').hidden = opts.length < 2;
@@ -2287,24 +2308,11 @@ function run(inp){
       + '</button>';
   }
   function renderTalhoes(ids){
-    var ar = areasOf(curProj);
-    if (!ids.length && !ar.length){
-      $('cards').innerHTML = '<div class="empty"><p>Nenhum talhão neste projeto. Crie uma área para agrupar talhões vizinhos que dividem solo, manejo e clima, ou cadastre um talhão avulso. A cultivar vem da lista do projeto e já traz ciclo, população e exigências da ficha.</p><div class="tact" style="justify-content:center"><button type="button" class="btn ghost" data-new="area">+ Área</button><button type="button" class="btn" data-new="talhao">+ Talhão</button></div></div>';
+    if (!ids.length){
+      $('cards').innerHTML = '<div class="empty"><p>Nenhum talhão nesta fazenda. Cadastre o primeiro: localização, cultivar e semeadura. Para outro talhão parecido, abra um talhão e use Duplicar.</p><button type="button" class="btn" data-new="t">+ Talhão</button></div>';
       return;
     }
-    var html = ar.map(function(aid){
-      var tids = ids.filter(function(k){ return talhoes[k].areaId === aid; }), o = tot(tids), open = !collapsed[aid];
-      var A = areas[aid], sis = '';
-      if (tids.length){ var i0 = talhoes[tids[0]].inputs; sis = PREPARO[i0.preparo] ? PREPARO[i0.preparo].nome : ''; }
-      return '<div class="agrp"><div class="ghd"><button type="button" class="ghead" data-tog="'+esc(aid)+'" aria-expanded="'+open+'">'+CHEV+'<span><b>'+esc(A.nome)+'</b><small>'
-        + (tids.length ? tids.length+(tids.length === 1 ? ' talhão' : ' talhões')+' · '+fmt(o.area,1)+' ha'+(sis ? ' · '+esc(sis) : '')+' · '+fmt(o.prod/o.area,1)+' sc/ha · '+fmt(o.prod,0)+' sc' : 'sem talhões ainda')
-        + '</small></span></button><button type="button" class="btn ghost sm" data-ae="'+esc(aid)+'">Editar</button></div>'
-        + (open ? '<div class="cards">'+tids.map(cardT).join('')+'<button type="button" class="btn ghost" data-an="'+esc(aid)+'" style="min-height:52px">+ Talhão nesta área</button></div>' : '')
-        + '</div>';
-    }).join('');
-    var solo = ids.filter(function(k){ return !areaOf(talhoes[k]); });
-    if (solo.length) html += '<div class="agrp">'+(ar.length ? '<div class="ghd"><span class="ghead" style="cursor:default"><span><b>Talhões avulsos</b><small>fora de uma área</small></span></span></div>' : '')+'<div class="cards">'+solo.map(cardT).join('')+'</div></div>';
-    $('cards').innerHTML = html;
+    $('cards').innerHTML = '<div class="cards">'+ids.map(cardT).join('')+'</div>';
   }
   $('cards').addEventListener('click', function(e){
     var el = e.target.closest('[data-id],[data-tog],[data-ae],[data-an],[data-new]'); if (!el) return;
@@ -2335,14 +2343,14 @@ function run(inp){
         fs: x.phase === 'antes' ? (x.sowT.indexOf('andamento') === 0 ? 'semeadura '+x.sowT : 'semeadura em '+x.sowT) : x.phase === 'fim' ? 'colhida ~'+fdt(x.harv) : 'dia '+fmt(Math.floor(x.das)+1)+' de '+fmt(Math.round(x.cyc))+' · colheita ~'+fdt(x.harv) }; });
     } else {
       var g = {}, byA = andBy === 'area';
-      rows.forEach(function(x){ var k = byA ? (areaOf(talhoes[x.id]) || '_') : x.vi; (g[k] = g[k] || []).push(x); });
+      rows.forEach(function(x){ var k = byA ? projOf(talhoes[x.id]) : x.vi; (g[k] = g[k] || []).push(x); });
       items = Object.keys(g).map(function(vi){
         var xs = g[vi], A = xs.reduce(function(s,x){ return s+x.a; }, 0) || 1;
         var pct = xs.reduce(function(s,x){ return s+x.pct*x.a; }, 0)/A, y = xs.reduce(function(s,x){ return s+x.y*x.a; }, 0)/A, pot = xs.reduce(function(s,x){ return s+x.pot*x.a; }, 0)/A;
         var st = xs.filter(function(x){ return x.phase === 'curso'; }).map(function(x){ return x.st; });
         var stage = st.length ? (Math.min.apply(null, st) === Math.max.apply(null, st) ? STAGES[st[0]].k : STAGES[Math.min.apply(null, st)].k+'–'+STAGES[Math.max.apply(null, st)].k) : (xs.every(function(x){ return x.phase === 'antes'; }) ? '—' : 'Fim');
         var h0 = Math.min.apply(null, xs.map(function(x){ return x.harv; })), h1 = Math.max.apply(null, xs.map(function(x){ return x.harv; }));
-        var ttl = byA ? (vi === '_' ? 'Talhões avulsos' : areas[vi].nome) : VARIETIES[vi].nome;
+        var ttl = byA ? projData(vi).nome : VARIETIES[vi].nome;
         var vs = byA ? ' · '+xs.map(function(x){ return shortV(x.vi); }).filter(function(v,i,a){ return a.indexOf(v) === i; }).join(', ') : '';
         return { key: 'g'+vi, link: null, t: ttl, m: xs.length+(xs.length===1?' talhão':' talhões')+' · '+fmt(A,1)+' ha'+vs, pct: pct, y: y, ret: pot ? y/pot*100 : 0, sc: y*A, stage: stage,
           fs: 'colheita '+(fdt(h0) === fdt(h1) ? '~'+fdt(h0) : 'entre '+fdt(h0)+' e '+fdt(h1)) };
@@ -2404,7 +2412,7 @@ function run(inp){
     var lk = safraFechada(curSafra), sf = safras['s' + curSafra];
     $('hLock').hidden = !lk;
     if (lk) $('hLock').innerHTML = '<b>Safra '+safraNome(curSafra)+' encerrada'+(sf && sf.fechada ? ' em '+fdt(Date.parse(sf.fechada)) : '')+'.</b> Experimento fechado: os dados ficam só para consulta. Para corrigir algo, reabra a safra na tela Safras.';
-    ['openVisit','openSheet','openHarv','tEdit','tDel'].forEach(function(id){ var b = document.getElementById(id); if (b){ b.disabled = lk; b.style.opacity = lk ? .45 : ''; } });
+    ['openVisit','openSheet','openHarv','tEdit','tDel','tDup'].forEach(function(id){ var b = document.getElementById(id); if (b){ b.disabled = lk; b.style.opacity = lk ? .45 : ''; } });
     var nb = document.getElementById('newT'); if (nb){ nb.disabled = lk; nb.style.opacity = lk ? .45 : ''; }
     document.body.classList.toggle('locked', lk);
   }
@@ -2521,7 +2529,7 @@ function run(inp){
       return '<div class="ccard" style="'+(ativa ? 'outline:2px solid var(--good);outline-offset:-2px' : '')+'"><a href="#projetos" data-y="'+y+'" style="text-decoration:none;color:inherit;display:grid;gap:8px">'
         + '<div class="chead"><div><h2>Safra '+safraNome(y)+'</h2><div class="cs">'+(safraFechada(y) ? 'encerrada' : y === new Date().getFullYear() || (y === new Date().getFullYear() - 1 && new Date().getMonth() < 6) ? 'em andamento' : y > new Date().getFullYear() ? 'planejada' : 'aberta')+(ativa ? ' · selecionada' : '')+'</div></div>'
         + (ids.length ? '<span style="text-align:right"><b class="num" style="font-family:var(--font-display);font-size:20px;display:block">'+fmt(o.area ? o.prod / o.area : 0, 1)+'</b><span class="cs">sc/ha · '+fmt(ret, 0)+'%</span></span>' : '')+'</div>'
-        + '<div class="cs">'+Object.keys(pj).length+(Object.keys(pj).length === 1 ? ' projeto' : ' projetos')+' · '+ids.length+(ids.length === 1 ? ' talhão' : ' talhões')+' · '+fmt(o.area, 0)+' ha'+(ids.length ? ' · '+fmt(o.prod, 0)+' sc projetadas' : '')+'</div>'
+        + '<div class="cs">'+Object.keys(pj).length+(Object.keys(pj).length === 1 ? ' fazenda' : ' fazendas')+' · '+ids.length+(ids.length === 1 ? ' talhão' : ' talhões')+' · '+fmt(o.area, 0)+' ha'+(ids.length ? ' · '+fmt(o.prod, 0)+' sc projetadas' : '')+'</div>'
         + (nC.length ? '<div class="cs" style="color:var(--ink)"><b>Colhido: '+fmt(aC ? pC / aC : 0, 1)+' sc/ha</b> em '+nC.length+' de '+ids.length+(ids.length === 1 ? ' talhão' : ' talhões')+' ('+fmt(pC, 0)+' sc)</div>' : '')+'</a>'
         + (ids.length ? '<div class="sfoot">'+(fech ? '<button type="button" class="btn ghost" data-reopen="'+y+'">Reabrir safra</button>' : '<button type="button" class="btn ghost" data-close="'+y+'">'+(nC.length < ids.length ? 'Encerrar safra ('+(ids.length - nC.length)+' sem colheita)' : 'Encerrar safra')+'</button>')+'</div>' : '')
         + '</div>';
@@ -2565,8 +2573,10 @@ function run(inp){
     var html = [];
     projIds().forEach(function(pid){
       var pn = projData(pid).nome, tids = talhoesOf(pid);
-      areasOf(pid).forEach(function(a){ var ts = tids.filter(function(k){ return talhoes[k].areaId === a; }); html.push(cCard(areas[a].nome, pn+' · '+ts.length+(ts.length === 1 ? ' talhão' : ' talhões'), ts[0], ts)); });
-      tids.filter(function(k){ return !areaOf(talhoes[k]); }).forEach(function(k){ html.push(cCard(talhoes[k].nome, pn+' · talhão avulso', k)); });
+      var gs = {}, ord = [];
+      tids.forEach(function(k){ var g = wxKey(k); if (!gs[g]){ gs[g] = []; ord.push(g); } gs[g].push(k); });
+      ord.forEach(function(g){ var ts = gs[g], nm = ts.length > 1 ? ts.map(function(k){ return talhoes[k].nome; }).join(', ') : talhoes[ts[0]].nome;
+        html.push(cCard(nm, pn+' · '+(ts.length > 1 ? ts.length+' talhões vizinhos, mesmo clima' : 'talhão'), ts[0], ts.length > 1 ? ts : null)); });
     });
     $('cList').innerHTML = html.length ? html.join('') : '<div class="empty"><p>Cadastre uma área ou talhão para importar o clima.</p></div>';
   }
@@ -2606,7 +2616,7 @@ function run(inp){
       var txt = JSON.stringify(bkData(), null, 1), blob = new Blob([txt], { type: 'application/json' }), a = document.createElement('a');
       a.href = URL.createObjectURL(blob); a.download = 'glycine-lab-backup-' + state.today + '.json'; document.body.appendChild(a); a.click();
       setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 2000);
-      $('bkMsg').textContent = 'Backup gerado: ' + Object.keys(allT).length + ' talhões, ' + Object.keys(projetos).length + ' projetos.';
+      $('bkMsg').textContent = 'Backup gerado: ' + Object.keys(allT).length + ' talhões, ' + Object.keys(projetos).length + ' fazendas.';
     } catch(e){ $('bkMsg').textContent = 'Não foi possível gerar o arquivo neste aparelho.'; }
   });
   if (window.claude && typeof window.claude.use === 'function') $('bkCard').hidden = true;
@@ -2667,12 +2677,12 @@ function run(inp){
       var gap = function(k){ return others.length ? Math.min.apply(null, others.map(function(x){ return x.loss[k]; })) - o.loss[k] : 0; };
       var better = FKEYS.filter(function(k){ return others.length && gap(k) >= 0.3; }).sort(function(a, b){ return gap(b) - gap(a); });
       var pts = [];
-      if (pos === 0 && order.length > 1 && o.ret - order[1].ret >= 0.5) pts.push('Preserva mais o potencial nas condições do projeto: '+fmt(o.ret - order[1].ret, 1)+' pp acima da '+shortV(order[1].vi)+'.');
+      if (pos === 0 && order.length > 1 && o.ret - order[1].ret >= 0.5) pts.push('Preserva mais o potencial nas condições da fazenda: '+fmt(o.ret - order[1].ret, 1)+' pp acima da '+shortV(order[1].vi)+'.');
       else if (pos === 0 && order.length > 1) pts.push('Empate técnico com a '+shortV(order[1].vi)+' (diferença menor que 0,5 pp).');
       better.forEach(function(k){ pts.push('Perde menos com '+FSHORT[k]+': '+fmt(gap(k), 1)+' pp a menos do potencial.'); });
       var cmin = others.length ? Math.min.apply(null, others.map(function(x){ return x.cyc; })) : o.cyc;
       if (others.length && o.cyc < cmin - 2) pts.push('Ciclo médio de '+fmt(o.cyc, 0)+' dias, '+fmt(cmin - o.cyc, 0)+' a menos: colhe antes e fica menos tempo exposta no campo.');
-      var own = o.own.n ? fmt(o.own.n)+(o.own.n === 1 ? ' talhão' : ' talhões')+', '+fmt(o.own.area, 1)+' ha, '+fmt(o.own.prod / o.own.area, 1)+' sc/ha projetadas ('+fmt(o.own.prod / o.own.pot * 100, 0)+'% do potencial)' : 'ainda não plantada neste projeto';
+      var own = o.own.n ? fmt(o.own.n)+(o.own.n === 1 ? ' talhão' : ' talhões')+', '+fmt(o.own.area, 1)+' ha, '+fmt(o.own.prod / o.own.area, 1)+' sc/ha projetadas ('+fmt(o.own.prod / o.own.pot * 100, 0)+'% do potencial)' : 'ainda não plantada nesta fazenda';
       var lv = lvl(o.ret);
       return '<div class="rcard'+(pos === 0 && order.length > 1 ? ' first' : '')+' state-'+lv+'" style="color:var(--ink)">'
         + '<div class="rtop"><div><span class="rpos">'+(pos + 1)+'º</span> <h3 style="display:inline">'+esc(v.nome)+'</h3><div class="cmeta">'+esc(v.ciclo)+' · GM '+fmt(v.gm, 1)+'</div></div>'
@@ -2698,7 +2708,7 @@ function run(inp){
   $('fPCult').innerHTML = VARIETIES.map(function(v,i){ return '<label class="chk"><input type="checkbox" value="'+i+'"> '+esc(v.nome)+' <small class="cmeta">· GM '+fmt(v.gm,1)+' · '+esc(v.ciclo)+'</small></label>'; }).join('');
   function openPForm(pid){
     editPId = pid; var p = pid ? projetos[pid] : null;
-    $('fPTitle').textContent = pid ? 'Editar projeto' : 'Novo projeto';
+    $('fPTitle').textContent = pid ? 'Editar fazenda' : 'Nova fazenda';
     $('fPNome').value = p ? p.nome : '';
     $('fPSafra').value = p ? (p.safra || '') : '2026/27';
     $('fPSis').value = String(p && p.sistema != null ? p.sistema : 2);
@@ -2711,10 +2721,10 @@ function run(inp){
   $('fP').addEventListener('submit', function(e){
     e.preventDefault();
     var nome = $('fPNome').value.trim(), cult = Array.prototype.filter.call($('fPCult').querySelectorAll('input'), function(c){ return c.checked; }).map(function(c){ return +c.value; });
-    var err = !nome ? 'Informe o nome do projeto.' : !cult.length ? 'Escolha ao menos uma cultivar.' : '';
+    var err = !nome ? 'Informe o nome da fazenda.' : '';
     if (err){ $('fPErr').textContent = err; return; }
     var base = editPId ? clone(projetos[editPId]) : { criado: new Date().toISOString() };
-    base.nome = nome; base.safra = $('fPSafra').value.trim(); base.sistema = +$('fPSis').value; base.cult = cult; base.atualizado = new Date().toISOString();
+    base.nome = nome; base.safra = $('fPSafra').value.trim(); base.sistema = +$('fPSis').value; base.atualizado = new Date().toISOString();
     var id = editPId || newId('p');
     putP(id, base); closePForm();
     if (location.hash === '#p-' + id) renderProject(); else location.hash = 'p-' + id;
@@ -2727,7 +2737,7 @@ function run(inp){
   function pDisarm(){ if (pDelArm){ clearTimeout(pDelArm); pDelArm = null; } $('pDel').classList.remove('armed'); $('pDel').textContent = 'Excluir'; }
   $('pDel').addEventListener('click', function(){
     if (!curProj || curProj === SEM) return;
-    if (talhoesOf(curProj).length){ $('lSync').textContent = 'Para excluir o projeto, mova ou exclua os talhões dele primeiro.'; return; }
+    if (talhoesOf(curProj).length){ $('lSync').textContent = 'Para excluir a fazenda, mova ou exclua os talhões dele primeiro.'; return; }
     if (!pDelArm){ $('pDel').classList.add('armed'); $('pDel').textContent = 'Confirmar exclusão'; pDelArm = setTimeout(pDisarm, 4000); return; }
     pDisarm(); var id = curProj; curProj = null; delP(id); location.hash = 'projetos';
   });
@@ -2778,18 +2788,30 @@ function run(inp){
   }
   function fillProj(sel){
     var ids = Object.keys(projetos);
-    $('fProj').innerHTML = ids.map(function(id){ return '<option value="'+esc(id)+'">'+esc(projetos[id].nome)+'</option>'; }).join('') + '<option value="'+SEM+'">Sem projeto</option>';
+    $('fProj').innerHTML = ids.map(function(id){ return '<option value="'+esc(id)+'">'+esc(projetos[id].nome)+'</option>'; }).join('') + '<option value="'+SEM+'">Sem fazenda</option>';
     $('fProj').value = sel;
   }
+  var dupFrom = null;
+  function openDup(id){
+    var src = talhoes[id]; if (!src) return; openForm(null); dupFrom = id;
+    var pid = projOf(src); fillProj(pid); $('fProjL').hidden = false;
+    $('fTitle').textContent = 'Duplicar ' + src.nome;
+    $('fNome').value = src.nome + ' (2)'; $('fArea').value = src.area; $('fAlt').value = src.alt == null ? '' : src.alt; $('fCoord').value = src.lat + ', ' + src.lon;
+    fillArea(pid, areaOf(src) || ''); $('fVar').value = String(src.inputs.vari);
+    var fr = sowRng(src.inputs); $('fSow').value = isoOfOffset(fr[0]); $('fSowF').value = fr[1] > fr[0] ? isoOfOffset(fr[1]) : '';
+    $('fPop').value = ''; $('fFal').value = src.inputs.fal != null ? src.inputs.fal : 0; potTouched = false; popHintF();
+    $('fManL').hidden = true;
+    $('fAreaHint').textContent = 'Copia localização, solo, preparo, palha, adubação e plantas daninhas de '+src.nome+'. Mude o que for diferente: nome, cultivar, semeadura, estande. Visitas e colheita não são copiadas.';
+  }
   function openForm(id, presetArea){
-    editId = id; var t = id ? talhoes[id] : null, empty = !Object.keys(talhoes).length;
+    editId = id; dupFrom = null; var t = id ? talhoes[id] : null, empty = !Object.keys(talhoes).length;
     var pid = t ? projOf(t) : curProj || SEM, pd = projData(pid);
     $('fTitle').textContent = id ? 'Editar talhão' : 'Novo talhão · ' + (pd ? pd.nome : '');
     $('fNome').value = t ? t.nome : '';
     $('fArea').value = t ? t.area : '';
     $('fAlt').value = t ? (t.alt == null ? '' : t.alt) : (empty ? 664 : '');
     $('fCoord').value = t ? t.lat+', '+t.lon : (empty ? '-21.7946, -48.1766' : '');
-    fillProj(pid); $('fProjL').hidden = !id;
+    fillProj(pid); $('fProjL').hidden = false;
     fillArea(pid, t ? (areaOf(t) || '') : (presetArea || ''));
     fillVar(pid, t ? +t.inputs.vari : null);
     $('fVar').value = String(t ? t.inputs.vari : projCult(pid)[0]);
@@ -2813,7 +2835,7 @@ function run(inp){
     var n = a ? areaTalhoes(aid).filter(function(k){ return k !== editId; }).length : 0;
     $('fManL').hidden = !!editId || n > 0;
     if (a && !editId && n === 0 && a.man != null) $('fMan').value = String(a.man);
-    $('fAreaHint').textContent = a ? 'Coordenadas, solo, preparo, adubação, plantas daninhas e clima vêm da área'+(n ? ' (iguais '+(n === 1 ? 'ao outro talhão' : 'aos outros '+n+' talhões')+' dela)' : '')+'.' : 'Talhão avulso: tem as próprias condições.';
+    $('fAreaHint').textContent = a ? 'Talhão ligado à área '+a.nome+': coordenadas, solo, adubação e clima são os mesmos '+(n ? (n === 1 ? 'do outro talhão' : 'dos outros '+n+' talhões')+' dela' : 'dela')+'.' : 'Talhões a menos de 2 km uns dos outros dividem o clima e a chuva do pluviômetro automaticamente.';
   }
   $('fAreaSel').addEventListener('change', areaUI);
   var potTouched = false;
@@ -2861,13 +2883,14 @@ function run(inp){
       var mi = +$('fMan').value, m = MANEJOS[mi], inp = clone(DEF);
       Object.assign(inp, m.s); if (m.vars) Object.assign(inp, m.vars[m.vdef || 0].s);
       Object.assign(inp, { cm: 0, clima: 0 }, { vari: vari, pot: pot, pop: pop, fal: fal, auto: true, stage: 0 }); setSow(inp, sow, sowF);
-      var nid = newId('t'), o = JSON.parse(norm(inp, { m: mi, v: m.vdef || 0, c: 1 }));
+      var nid = newId('t'), o = JSON.parse(norm(inp, { m: mi, v: m.vdef || 0, c: 1 })), dsrc = dupFrom && talhoes[dupFrom] ? talhoes[dupFrom] : null;
+      if (dsrc){ o.inputs = Object.assign(clone(dsrc.inputs), { cm: 0, clima: 0, p0: DEF.p0, vari: vari, pot: pot, pop: pop, fal: fal, auto: true, stage: 0 }); setSow(o.inputs, sow, sowF); o.scn = clone(dsrc.scn || {}); }
       var naid2 = $('fAreaSel').value, sibs2 = naid2 ? areaTalhoes(naid2) : [];
       if (sibs2.length){ var src2 = talhoes[sibs2[0]]; AREA_KEYS.forEach(function(x){ o.inputs[x] = src2.inputs[x]; }); o.scn = clone(src2.scn || {}); }
       var nt = { nome: nome, area: area, lat: c[0], lon: c[1], alt: alt, inputs: o.inputs, scn: o.scn, safra: curSafra, criado: new Date().toISOString() };
       if (naid2) nt.areaId = naid2;
-      if (curProj && curProj !== SEM) nt.proj = curProj;
-      putT(nid, nt);
+      var npj = $('fProj').value; if (npj && npj !== SEM) nt.proj = npj;
+      putT(nid, nt); dupFrom = null;
       closeForm(); location.hash = 't-' + nid;
     }
   });
@@ -2877,6 +2900,7 @@ function run(inp){
   $('newT').addEventListener('click', function(){ openForm(null); });
   $('toList').addEventListener('click', function(){ location.hash = 'p-' + (curProj || SEM); });
   $('tEdit').addEventListener('click', function(){ if (curId) openForm(curId); });
+  $('tDup').addEventListener('click', function(){ if (curId){ saveNow(); openDup(curId); } });
   function disarm(){ if (delArm){ clearTimeout(delArm); delArm = null; } $('tDel').classList.remove('armed'); $('tDel').textContent = 'Excluir'; }
   $('tDel').addEventListener('click', function(){
     if (!curId) return;
@@ -2885,8 +2909,26 @@ function run(inp){
     var id = curId, back = curProj || SEM; curId = null; delT(id); location.hash = projIds().indexOf(back) >= 0 || projetos[back] ? 'p-' + back : 'projetos';
   });
   // clima diário: link da Open-Meteo e importação do texto colado
-  function wxKey(id){ var t = talhoes[id]; return t ? (areaOf(t) || id) : null; }
-  function wxLoc(id){ var t = talhoes[id], a = t && areaOf(t) ? areas[t.areaId] : null; return a ? { lat: a.lat, lon: a.lon, nome: 'Área '+a.nome } : { lat: t.lat, lon: t.lon, nome: 'Talhão '+t.nome }; }
+  // Clima por vizinhança: talhões (e áreas antigas) a até 2 km uns dos outros usam o mesmo registro de clima.
+  // Fica com o registro que tem mais dias de dados; empate, o código mais antigo. Áreas antigas continuam valendo.
+  var NEAR_KM = 2;
+  function kmBetween(a, b){ var r = Math.PI / 180, dl = (b.lat - a.lat) * r, dn = (b.lon - a.lon) * r * Math.cos((a.lat + b.lat) / 2 * r); return 6371 * Math.sqrt(dl * dl + dn * dn); }
+  function wxGroup(id){
+    var t = talhoes[id]; if (!t) return [];
+    if (areaOf(t)) return [t.areaId];
+    var me = { lat: +t.lat, lon: +t.lon }, out = [];
+    if (!isFinite(me.lat) || !isFinite(me.lon)) return [id];
+    Object.keys(talhoes).forEach(function(k){ var u = talhoes[k]; if (k !== id && areaOf(u)) return; if (k === id || kmBetween(me, { lat: +u.lat, lon: +u.lon }) <= NEAR_KM) out.push(k); });
+    Object.keys(areas).forEach(function(a){ var A = areas[a]; if (clima[a] && isFinite(+A.lat) && kmBetween(me, { lat: +A.lat, lon: +A.lon }) <= NEAR_KM) out.push(a); });
+    return out;
+  }
+  function wxKey(id){
+    var t = talhoes[id]; if (!t) return null; if (areaOf(t)) return t.areaId;
+    var g = wxGroup(id), best = null, bn = -1;
+    g.slice().sort().forEach(function(k){ var c = clima[k], n = c ? Object.keys(c.d || {}).length + Object.keys(c.p || {}).length : -1; if (n > bn){ bn = n; best = k; } });
+    return best || id;
+  }
+  function wxLoc(id){ var t = talhoes[id], k0 = t ? wxKey(id) : null, a = t ? (areaOf(t) ? areas[t.areaId] : areas[k0] || null) : null, kt = !a && k0 && talhoes[k0] ? talhoes[k0] : t, ng = t && !areaOf(t) ? wxGroup(id).filter(function(k){ return talhoes[k]; }).length : 1; if (kt !== t && kt) t = kt; return a ? { lat: a.lat, lon: a.lon, nome: 'Área '+a.nome } : { lat: t.lat, lon: t.lon, nome: (ng > 1 ? 'Talhões vizinhos de ' : 'Talhão ')+t.nome }; }
   function wxStart(id){
     var t = talhoes[id], k = wxKey(id), ids = areaOf(t) ? areaTalhoes(k) : [id];
     return Math.min.apply(null, ids.map(function(x){ return DAY0 + (sowRng(talhoes[x].inputs)[0] || 0)*864e5; }));
@@ -3025,7 +3067,7 @@ function run(inp){
     $('fVObs').value = ''; $('fVErr').textContent = '';
     $('fVPm').value = ''; $('fVEsp').value = (talhoes[curId] && talhoes[curId].esp) || 50; $('fVFal').value = ''; $('fVPerda').value = ''; $('fVCausa').value = '7'; $('fVDist').value = '0'; $('fVFito').value = '0'; $('fVFitoP').value = '0'; vPopH();
     var sib = siblings(curId); $('fVAllL').hidden = !sib.length; $('fVAll').checked = true;
-    $('fVAllT').textContent = 'Registrar também '+(sib.length === 1 ? 'no outro talhão' : 'nos outros '+sib.length+' talhões')+' da área (chuva, temperatura, eventos, plantas daninhas e fitotoxicidade valem para a área; estande e perda de plantas ficam só neste talhão)';
+    $('fVAllT').textContent = 'Registrar também '+(sib.length === 1 ? 'no outro talhão' : 'nos outros '+sib.length+' talhões')+' '+(areaOf(talhoes[curId]) ? 'da área' : 'vizinhos (até 2 km)')+' (chuva, temperatura, eventos, plantas daninhas e fitotoxicidade valem para a área; estande e perda de plantas ficam só neste talhão)';
     vPer(); $('dlgV').hidden = false; $('fVChuva').focus();
   }
   function closeVisit(){ $('dlgV').hidden = true; }
