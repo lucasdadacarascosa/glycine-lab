@@ -536,6 +536,7 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 #hList{overflow-y:auto;-webkit-overflow-scrolling:touch;display:grid;gap:10px;padding-bottom:6px}
 .hcard{border:1px solid var(--line);border-radius:12px;padding:10px 12px}.hct{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin-bottom:6px}.hct b{font-size:15.5px}.hct span{font-size:12.5px;color:var(--muted)}.hct em{font-style:normal;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--line)}
 .hcard dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:13.5px}.hcard dt{color:var(--muted)}.hcard dd{margin:0}
+.sclose{display:grid;gap:8px;margin-top:10px}.sclose .btn{width:100%;min-height:46px;text-align:center}
 </style>
 </head>
 <body>
@@ -615,8 +616,8 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   <div class="pfilt" id="pFilt" role="group" aria-label="Filtrar por cultivar"></div>
   <div class="cards" id="pCards"></div>
   <button type="button" class="newp" id="newP" style="margin-top:12px">+ Nova fazenda</button>
-  <a href="#safras" class="ccard dlink" id="pClose" style="margin-top:12px"><span><h2 id="pCloseT">Encerrar a safra</h2><span class="cs" id="pCloseS">Registre as colheitas e feche o experimento na tela Safras</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></a>
-  <a class="btn rbtn" id="pRel" hidden style="margin-top:10px">Gerar relatório final</a>
+  <div class="ccard" id="pClose" style="margin-top:12px"><div><h2 id="pCloseT">Encerrar a safra</h2><span class="cs" id="pCloseS"></span></div>
+    <div class="sclose" id="pCloseB"></div></div>
 </div>
 
 <div class="lv" id="viewAnd" hidden>
@@ -2270,15 +2271,21 @@ function run(inp){
 
   // tela 1: projetos
   var pFilt = 'all';
+  document.addEventListener('click', function(e){ var c = e.target.closest && e.target.closest('[data-pclose]'); if (!c) return; e.preventDefault();
+    if (c.dataset.arm !== '1'){ c.dataset.arm = '1'; c.textContent = 'Toque de novo para confirmar: encerra a safra e abre o relatório final'; return; }
+    closeSafra(+c.dataset.pclose); location.hash = 'relatorio-' + c.dataset.pclose; });
   document.addEventListener('click', function(e){ var b = e.target.closest && e.target.closest('#pFilt [data-f]'); if (!b) return; pFilt = b.dataset.f; renderProjects(); });
   function renderProjects(){ try { updBadge(); } catch(e){}
     autoWx(null, function(){ try { updBadge(); } catch(e){} });
     (function(){ var ids = Object.keys(talhoes), nC = ids.filter(function(k){ return talhoes[k].colheita; }).length, fe = safraFechada(curSafra);
       $('pCloseT').textContent = fe ? 'Safra '+safraNome(curSafra)+' encerrada' : 'Encerrar a safra '+safraNome(curSafra);
-      $('pCloseS').textContent = fe ? 'Dados fechados para consulta. Para reabrir, vá em Safras.' : (ids.length ? nC+' de '+ids.length+(ids.length === 1 ? ' talhão colhido' : ' talhões colhidos')+'. Encerrar fecha o experimento e grava o retrato final.' : 'Cadastre talhões para começar.');
+      $('pCloseS').textContent = fe ? 'Dados fechados para consulta. Para reabrir, vá em Safras.' : (ids.length ? nC+' de '+ids.length+(ids.length === 1 ? ' talhão colhido' : ' talhões colhidos')+'. Ao encerrar, o experimento é fechado, o retrato final é gravado e o relatório é gerado.' : 'Cadastre talhões para começar.');
       $('pClose').hidden = !ids.length && !fe;
-      var rb = $('pRel'); rb.hidden = !nC; rb.href = '#relatorio-' + curSafra; rb.className = 'btn rbtn' + (fe ? '' : ' ghost');
-      rb.textContent = fe ? 'Gerar relatório final' : 'Gerar relatório (prévia: '+nC+' de '+ids.length+' colhidos)'; })();
+      var y = curSafra;
+      $('pCloseB').innerHTML = !ids.length ? '' : fe
+        ? '<a class="btn rbtn" href="#relatorio-'+y+'">Gerar relatório final</a><a class="btn ghost rbtn" href="#safras">Reabrir em Safras</a>'
+        : '<button type="button" class="btn" data-pclose="'+y+'">'+(nC < ids.length ? 'Encerrar safra e gerar relatório ('+(ids.length - nC)+' sem colheita)' : 'Encerrar safra e gerar relatório final')+'</button>'
+          + (nC ? '<a class="btn ghost rbtn" href="#relatorio-'+y+'">Ver prévia do relatório ('+nC+' de '+ids.length+' colhidos)</a>' : ''); })();
     $('pSafraLink').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Safra '+safraNome(curSafra)+(safraFechada(curSafra) ? ' · encerrada' : '');
     var ids = projIds();
     if (mode === 'carregando' && !ids.length){ $('pCards').innerHTML = '<div class="empty"><p>Carregando fazendas…</p></div>'; return; }
@@ -2707,15 +2714,17 @@ function run(inp){
         + (ids.length ? '<span style="text-align:right"><b class="num" style="font-family:var(--font-display);font-size:20px;display:block">'+fmt(o.area ? o.prod / o.area : 0, 1)+'</b><span class="cs">sc/ha · '+fmt(ret, 0)+'%</span></span>' : '')+'</div>'
         + '<div class="cs">'+Object.keys(pj).length+(Object.keys(pj).length === 1 ? ' fazenda' : ' fazendas')+' · '+ids.length+(ids.length === 1 ? ' talhão' : ' talhões')+' · '+fmt(o.area, 0)+' ha'+(ids.length ? ' · '+fmt(o.prod, 0)+' sc projetadas' : '')+'</div>'
         + (nC.length ? '<div class="cs" style="color:var(--ink)"><b>Colhido: '+fmt(aC ? pC / aC : 0, 1)+' sc/ha</b> em '+nC.length+' de '+ids.length+(ids.length === 1 ? ' talhão' : ' talhões')+' ('+fmt(pC, 0)+' sc)</div>' : '')+'</a>'
-        + (nC.length ? '<a class="btn '+(fech ? '' : 'ghost')+' rbtn" href="#relatorio-'+y+'">'+(fech ? 'Gerar relatório final' : 'Gerar relatório (prévia: '+nC.length+' de '+ids.length+' colhidos)')+'</a>' : '')
-        + (ids.length ? '<div class="sfoot">'+(fech ? '<button type="button" class="btn ghost" data-reopen="'+y+'">Reabrir safra</button>' : '<button type="button" class="btn ghost" data-close="'+y+'">'+(nC.length < ids.length ? 'Encerrar safra ('+(ids.length - nC.length)+' sem colheita)' : 'Encerrar safra')+'</button>')+'</div>' : '')
+        + (ids.length ? '<div class="sclose">'+(fech
+            ? '<a class="btn rbtn" href="#relatorio-'+y+'">Gerar relatório final</a><button type="button" class="btn ghost" data-reopen="'+y+'">Reabrir safra</button>'
+            : '<button type="button" class="btn" data-close="'+y+'">'+(nC.length < ids.length ? 'Encerrar safra e gerar relatório ('+(ids.length - nC.length)+' sem colheita)' : 'Encerrar safra e gerar relatório final')+'</button>'
+              + (nC.length ? '<a class="btn ghost rbtn" href="#relatorio-'+y+'">Ver prévia do relatório ('+nC.length+' de '+ids.length+' colhidos)</a>' : ''))+'</div>' : '')
         + '</div>';
     }).join('');
     curSafra = keep; viewT();
   }
   $('sList').addEventListener('click', function(e){
     var c = e.target.closest('[data-close]'), ro = e.target.closest('[data-reopen]');
-    if (c){ e.preventDefault(); if (c.dataset.arm !== '1'){ c.dataset.arm = '1'; c.textContent = 'Toque de novo para encerrar: grava o retrato final de todos os talhões'; return; } closeSafra(+c.dataset.close); renderSafras(); return; }
+    if (c){ e.preventDefault(); if (c.dataset.arm !== '1'){ c.dataset.arm = '1'; c.textContent = 'Toque de novo para confirmar: encerra a safra e abre o relatório final'; return; } closeSafra(+c.dataset.close); location.hash = 'relatorio-' + c.dataset.close; return; }
     if (ro){ e.preventDefault(); reopenSafra(+ro.dataset.reopen); renderSafras(); return; }
     var a = e.target.closest('[data-y]'); if (!a) return; setSafra(+a.dataset.y); });
   $('newS').addEventListener('click', function(){
