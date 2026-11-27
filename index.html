@@ -505,6 +505,37 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
 .trow .tl{flex:1 1 auto;min-width:0;display:grid;gap:1px}.trow .tl b{font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .trow .tl span{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.trow .tl .tx.late{color:var(--warn)}
 .trow .tr{text-align:right;display:grid;flex:0 0 auto}.trow .tr b{font-size:17px}.trow .tr span{font-size:11.5px;color:var(--muted)}
+
+#viewRel .rtools{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+#viewRel .rtip{margin:0 0 12px;font-size:12.5px}
+.rbtn{display:flex;align-items:center;justify-content:center;min-height:44px;text-decoration:none;margin-top:4px}
+.rdoc{background:#fff;color:#1f2a22;border-radius:16px;padding:18px 16px;font-size:13.5px;line-height:1.45}
+.rdoc h1{font-size:22px;margin:6px 0 2px;color:#123321}.rdoc h2{font-size:16.5px;margin:0 0 8px;color:#123321;border-bottom:2px solid #dfe8df;padding-bottom:4px}.rdoc h3{font-size:14px;margin:12px 0 6px}
+.rcover{border-bottom:3px solid #123321;padding-bottom:10px;margin-bottom:14px}.rbrand{display:flex;align-items:center;gap:8px;font-weight:700;color:#123321}.rlogo svg{width:30px;height:30px;display:block}.rsub{color:#5f6b62;font-size:12.5px}
+.rsec{margin:0 0 18px}.rkpi,.rgrp,.rtab tr,.rchart{break-inside:avoid}.rsec ul{margin:4px 0;padding-left:18px}.rsec li{margin:3px 0}
+.rkpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.rkpi div{background:#f2f6f1;border-radius:10px;padding:8px 10px}.rkpi b{display:block;font-size:18px;color:#123321}.rkpi span{font-size:11.5px;color:#5f6b62}
+.rchart{width:100%;height:auto;margin:4px 0 8px}
+.rtab{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}.rtab th{text-align:left;background:#123321;color:#fff;font-weight:600;padding:5px 6px}.rtab td{padding:5px 6px;border-bottom:1px solid #e3e9e2;vertical-align:top}.rtab td span{color:#5f6b62;font-size:11px}
+.rsm{font-size:11px}.rsec{overflow-x:auto}
+.rcv{border:1px solid #e3e9e2;border-radius:10px;padding:8px 10px;margin:8px 0;break-inside:avoid}.rcv h3{margin:0 0 4px}.rcv h3 span{font-weight:400;color:#5f6b62;font-size:12px}
+.rpf b{color:#2f7a4a}.rpw b{color:#b5642a}.rpf ul,.rpw ul{margin:2px 0 6px}
+.rnote{font-size:11.5px;color:#5f6b62}.rgrp{margin:6px 0}.rgr{display:grid;grid-template-columns:1.3fr .9fr 1.2fr;gap:6px;padding:4px 0;border-bottom:1px solid #eef2ed;font-size:12.5px}
+.rfoot p{font-size:11px;color:#5f6b62}
+@media (max-width:520px){.rkpi{grid-template-columns:repeat(2,1fr)}}
+@media print{
+  @page{size:A4;margin:12mm}
+  body{background:#fff !important}
+  #bnav,.dlg,#splash,#login,.rtools,.rtip,.lv:not(#viewRel){display:none !important}
+  #viewRel{display:block !important;padding:0 !important;margin:0 !important}
+  .rdoc{border-radius:0;padding:0;font-size:11pt}.rsec{overflow:visible}.rkpi{grid-template-columns:repeat(3,1fr)}
+  .rtab th{-webkit-print-color-adjust:exact;print-color-adjust:exact}.rkpi div,.rchart{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+.hbox{max-height:88vh;display:flex;flex-direction:column;gap:8px}.hhead{display:flex;justify-content:space-between;align-items:center;gap:10px}.hhead h2{margin:0;font-size:17px}
+.hnb{display:flex;align-items:center;gap:8px;font-size:13.5px;min-height:36px}.hnb input{width:20px;height:20px}
+#hList{overflow-y:auto;-webkit-overflow-scrolling:touch;display:grid;gap:10px;padding-bottom:6px}
+.hcard{border:1px solid var(--line);border-radius:12px;padding:10px 12px}.hct{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin-bottom:6px}.hct b{font-size:15.5px}.hct span{font-size:12.5px;color:var(--muted)}.hct em{font-style:normal;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--line)}
+.hcard dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:13.5px}.hcard dt{color:var(--muted)}.hcard dd{margin:0}
 </style>
 </head>
 <body>
@@ -535,6 +566,15 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   <div class="lhead"><div><h1>Desempenho</h1><div class="sub">Histórico de todas as safras, a partir das colheitas registradas</div></div></div>
   <div id="dBody"></div>
 </div>
+
+<div class="lv" id="viewRel" hidden><div id="relBody"></div></div>
+
+<div class="dlg" id="dlgHist" hidden><div class="dbox hbox" role="dialog" aria-labelledby="hTitle">
+  <div class="hhead"><h2 id="hTitle">Histórico de visitas</h2><button type="button" class="btn ghost" id="hClose">Fechar</button></div>
+  <label class="hnb" id="hNbL" hidden><input type="checkbox" id="hNb"> Incluir talhões vizinhos (mesmo clima)</label>
+  <div id="hSum" class="cs"></div>
+  <div id="hList"></div>
+</div></div>
 
 <div class="dlg" id="dlgP2" hidden><form class="dbox" id="fP2" novalidate>
   <h2>Chuva do pluviômetro</h2>
@@ -576,6 +616,7 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   <div class="cards" id="pCards"></div>
   <button type="button" class="newp" id="newP" style="margin-top:12px">+ Nova fazenda</button>
   <a href="#safras" class="ccard dlink" id="pClose" style="margin-top:12px"><span><h2 id="pCloseT">Encerrar a safra</h2><span class="cs" id="pCloseS">Registre as colheitas e feche o experimento na tela Safras</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></a>
+  <a class="btn rbtn" id="pRel" hidden style="margin-top:10px">Gerar relatório final</a>
 </div>
 
 <div class="lv" id="viewAnd" hidden>
@@ -752,6 +793,8 @@ body.hasnav { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
     <div class="hsplit" id="hSplit"></div>
     <button type="button" class="more" id="openWx" hidden style="margin-top:-4px">Clima diário (Open-Meteo)</button>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button type="button" class="btn ghost" id="openVisit" style="min-height:52px;font-size:15px">Registrar visita</button><button type="button" class="btn" id="openSheet" style="min-height:52px;font-size:15px">Atualizar condições</button></div>
+    <button type="button" class="btn ghost" id="openPerda" style="min-height:46px;width:100%;margin-top:8px;font-size:14.5px">Registrar perda de plantas no estande</button>
+    <button type="button" class="btn ghost" id="openHist" style="min-height:46px;width:100%;margin-top:8px;font-size:14.5px">Histórico de visitas</button>
     <button type="button" class="btn ghost" id="openHarv" style="min-height:48px;font-size:15px;margin-top:8px;width:100%">Registrar colheita</button>
   </section>
 
@@ -2158,11 +2201,11 @@ function run(inp){
     var allow = projCult(projOf(t)), kids = $('vari').children;
     for (var i=0;i<kids.length;i++) kids[i].hidden = allow.indexOf(i) < 0 && i !== state.vari;
   }
-  var VDEPTH = { viewDes: 0, viewSafras: -1, viewProj: 0, viewAnd: 0, viewVar: 0, viewClima: 0, viewAj: 0, viewList: 1, viewDetail: 2 }, curView = null;
+  var VDEPTH = { viewRel: 1, viewDes: 0, viewSafras: -1, viewProj: 0, viewAnd: 0, viewVar: 0, viewClima: 0, viewAj: 0, viewList: 1, viewDetail: 2 }, curView = null;
   function show(view){
     var dir = curView == null || curView === view ? 0 : VDEPTH[view] > VDEPTH[curView] ? 1 : VDEPTH[view] < VDEPTH[curView] ? -1 : 0;
-    ['viewDes','viewSafras','viewProj','viewList','viewDetail','viewAnd','viewVar','viewClima','viewAj'].forEach(function(v){ $(v).hidden = v !== view; });
-    var nav = view !== 'viewDetail', top = view === 'viewList' || view === 'viewSafras' || view === 'viewDes' ? 'viewProj' : view;
+    ['viewDes','viewSafras','viewProj','viewList','viewDetail','viewAnd','viewVar','viewClima','viewAj','viewRel'].forEach(function(v){ $(v).hidden = v !== view; });
+    var nav = view !== 'viewDetail' && view !== 'viewRel', top = view === 'viewList' || view === 'viewSafras' || view === 'viewDes' ? 'viewProj' : view;
     $('bnav').hidden = !nav; document.body.classList.toggle('hasnav', nav);
     Array.prototype.forEach.call($('bnav').children, function(a){ if (a.dataset.v === top) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     if (nav) updBadge();
@@ -2201,6 +2244,7 @@ function run(inp){
     else if ((m = h.match(/^p-([A-Za-z0-9]+?)(?:-(andamento|comparativo))?$/)) && (projetos[m[1]] || (m[1] === SEM && projIds().indexOf(SEM) >= 0))) showProject(m[1], m[2] || 'talhoes');
     else if (h === 'safras' || h === '') showSimple('viewSafras', renderSafras);
     else if (h === 'desempenho') showSimple('viewDes', renderDes);
+    else if ((m = h.match(/^relatorio-(\d{4})$/))) showSimple('viewRel', function(){ renderRel(+m[1]); });
     else if (h === 'andamento') showSimple('viewAnd', renderGAnd);
     else if (h === 'variedades') showSimple('viewVar', renderVar);
     else if (h === 'clima') showSimple('viewClima', renderClima);
@@ -2232,7 +2276,9 @@ function run(inp){
     (function(){ var ids = Object.keys(talhoes), nC = ids.filter(function(k){ return talhoes[k].colheita; }).length, fe = safraFechada(curSafra);
       $('pCloseT').textContent = fe ? 'Safra '+safraNome(curSafra)+' encerrada' : 'Encerrar a safra '+safraNome(curSafra);
       $('pCloseS').textContent = fe ? 'Dados fechados para consulta. Para reabrir, vá em Safras.' : (ids.length ? nC+' de '+ids.length+(ids.length === 1 ? ' talhão colhido' : ' talhões colhidos')+'. Encerrar fecha o experimento e grava o retrato final.' : 'Cadastre talhões para começar.');
-      $('pClose').hidden = !ids.length && !fe; })();
+      $('pClose').hidden = !ids.length && !fe;
+      var rb = $('pRel'); rb.hidden = !nC; rb.href = '#relatorio-' + curSafra; rb.className = 'btn rbtn' + (fe ? '' : ' ghost');
+      rb.textContent = fe ? 'Gerar relatório final' : 'Gerar relatório (prévia: '+nC+' de '+ids.length+' colhidos)'; })();
     $('pSafraLink').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Safra '+safraNome(curSafra)+(safraFechada(curSafra) ? ' · encerrada' : '');
     var ids = projIds();
     if (mode === 'carregando' && !ids.length){ $('pCards').innerHTML = '<div class="empty"><p>Carregando fazendas…</p></div>'; return; }
@@ -2251,8 +2297,8 @@ function run(inp){
       var ar = areasOf(pid), nA = ar.filter(function(a){ return tids.some(function(k){ return talhoes[k].areaId === a; }); }).length;
       var row = function(k){ var t = talhoes[k], e = evalT(t), rt = e.r.retained*100, lv = lvl(rt), st = e.s.stage, lastV = (t.visitas || []).reduce(function(m, x){ return Math.max(m, isoToMs(x.d)); }, 0),
           dsow = Math.round((isoToMs(state.today) - (DAY0 + sowRng(e.s)[0] * 864e5)) / 864e5), dv = lastV ? Math.round((isoToMs(state.today) - lastV) / 864e5) : null,
-          nxt = t.colheita ? 'colhido · '+fmt(+t.colheita.sc,1)+' sc/ha' : dsow < 0 ? 'semeadura em '+(-dsow)+(dsow === -1 ? ' dia' : ' dias') : dv == null ? 'sem visita ainda' : dv >= 10 ? 'última visita há '+dv+' dias' : dv === 0 ? 'visitado hoje' : 'visita há '+dv+(dv === 1 ? ' dia' : ' dias');
-        return '<a class="trow state-'+lv+'" href="#t-'+esc(k)+'"><span class="tl"><b>'+esc(t.nome)+'</b><span>'+esc(shortV(e.s.vari))+' · '+(dsow < 0 ? 'a semear' : t.colheita ? 'colhido' : STAGES[st].k)+' · '+fmt(+t.area || 0, 1)+' ha</span><span class="tx'+(dv != null && dv >= 10 && !t.colheita ? ' late' : '')+'">'+nxt+'</span></span><span class="tr"><b class="num">'+fmt(rt,0)+'%</b><span>'+fmt(e.r.yield,1)+' sc/ha</span></span></a>'; };
+          nxt = t.colheita ? 'colhido em '+fdt(isoToMs(t.colheita.data))+' · proj. '+fmt(e.r.yield,1) : dsow < 0 ? 'semeadura em '+(-dsow)+(dsow === -1 ? ' dia' : ' dias') : dv == null ? 'sem visita ainda' : dv >= 10 ? 'última visita há '+dv+' dias' : dv === 0 ? 'visitado hoje' : 'visita há '+dv+(dv === 1 ? ' dia' : ' dias');
+        return '<a class="trow state-'+lv+'" href="#t-'+esc(k)+'"><span class="tl"><b>'+esc(t.nome)+'</b><span>'+esc(shortV(e.s.vari))+' · '+(dsow < 0 ? 'a semear · ' : t.colheita ? '' : STAGES[st].k+' · ')+''+fmt(+t.area || 0, 1)+' ha</span><span class="tx'+(dv != null && dv >= 10 && !t.colheita ? ' late' : '')+'">'+nxt+'</span></span><span class="tr">'+(t.colheita ? '<b class="num">'+fmt(+t.colheita.sc,1)+'</b><span>sc/ha colhidas</span>' : '<b class="num">'+fmt(rt,0)+'%</b><span>'+fmt(e.r.yield,1)+' sc/ha</span>')+'</span></a>'; };
       var shown = tids.filter(function(k){ return pFilt === 'all' || +talhoes[k].inputs.vari === +pFilt; });
       if (pFilt !== 'all' && !shown.length) return '';
       var rows = shown.map(row);
@@ -2412,7 +2458,7 @@ function run(inp){
     var lk = safraFechada(curSafra), sf = safras['s' + curSafra];
     $('hLock').hidden = !lk;
     if (lk) $('hLock').innerHTML = '<b>Safra '+safraNome(curSafra)+' encerrada'+(sf && sf.fechada ? ' em '+fdt(Date.parse(sf.fechada)) : '')+'.</b> Experimento fechado: os dados ficam só para consulta. Para corrigir algo, reabra a safra na tela Safras.';
-    ['openVisit','openSheet','openHarv','tEdit','tDel','tDup'].forEach(function(id){ var b = document.getElementById(id); if (b){ b.disabled = lk; b.style.opacity = lk ? .45 : ''; } });
+    ['openVisit','openSheet','openHarv','tEdit','tDel','tDup','openPerda'].forEach(function(id){ var b = document.getElementById(id); if (b){ b.disabled = lk; b.style.opacity = lk ? .45 : ''; } });
     var nb = document.getElementById('newT'); if (nb){ nb.disabled = lk; nb.style.opacity = lk ? .45 : ''; }
     document.body.classList.toggle('locked', lk);
   }
@@ -2513,6 +2559,136 @@ function run(inp){
     h += '<div class="dsec"><h2>Manejo</h2><div class="cs">Produtividade real por sistema de preparo e por palhada na semeadura. Com poucos talhões, diferenças podem vir da área ou da cultivar, não do manejo.</div><div>'+grpHtml(byP)+'</div>'+(Object.keys(byPal).length ? '<div>'+grpHtml(byPal)+'</div>' : '')+'</div>';
     $('dBody').innerHTML = h;
   }
+  // ===== Relatório da safra (tela imprimível; no iPhone: Salvar PDF pela impressão) =====
+  function relData(y){
+    var all = Object.keys(allT).filter(function(k){ return tSafra(allT[k]) === y; });
+    var rows = all.map(function(k){
+      var t = allT[k], c = t.colheita || null, rt = (c && c.retrato) || t.retrato || null, inp = Object.assign({}, DEF, t.inputs || {});
+      var vi = rt && rt.vari != null ? +rt.vari : +inp.vari, sr = sowRng(inp), sowMs = DAY0 + sr[0] * 864e5, harvMs = c && c.data ? isoToMs(c.data) : null;
+      var perdaV = (t.visitas || []).filter(function(x){ return +x.perda > 0; }).map(function(x){ return { pct: +x.perda, causa: CAUSAS[x.causa] || '', dist: !!x.dist, d: x.d }; });
+      var rc = null; try { if (talhoes[k]) rc = rainCycle(k); } catch(e){}
+      return { id: k, nome: t.nome, faz: projData(t.proj || SEM) ? projData(t.proj || SEM).nome : 'Sem fazenda', area: +t.area || 0, vi: vi, v: VARIETIES[vi] || { nome: 'Cultivar ' + vi, potRef: 90, ref: 0 },
+        real: c && c.sc != null ? +c.sc : null, umid: c ? c.umid : null, proj: rt && rt.yield != null ? +rt.yield : null, pot: rt && rt.pot != null ? +rt.pot : +inp.pot,
+        ret: rt && rt.retained != null ? +rt.retained : null, perdas: rt && rt.perdas ? rt.perdas : {}, prep: rt && rt.preparo != null ? rt.preparo : inp.preparo,
+        palha: rt && rt.palhaT != null ? +rt.palhaT : palhaT0(inp), form: rt && rt.form != null ? rt.form : inp.form, dose: rt && rt.dose != null ? rt.dose : inp.dose, kcl: rt && rt.kcl != null ? rt.kcl : inp.kcl,
+        pop: rt && rt.pop != null ? +rt.pop : +inp.pop, sowMs: sowMs, sowB: sr[1] > sr[0] ? DAY0 + sr[1] * 864e5 : null, harvMs: harvMs, ciclo: harvMs ? Math.round((harvMs - sowMs) / 864e5) : null,
+        chuva: rc && rc.n ? Math.round(rc.mm) : rt && rt.chuva != null ? +rt.chuva : null, perdaV: perdaV, obs: c && c.obs ? c.obs : '' };
+    });
+    return { all: rows, H: rows.filter(function(x){ return x.real != null; }) };
+  }
+  function relWavg(L, f){ var a = 0, v = 0; L.forEach(function(x){ var w = x.area || 1; a += w; v += f(x) * w; }); return a ? v / a : 0; }
+  function relTop(pr){ var k = Object.keys(pr || {}).sort(function(a, b){ return pr[b] - pr[a]; })[0]; return k && pr[k] >= 0.5 ? k : null; }
+  function relAdub(x){ var f = FORMS[x.form]; return f && x.form ? f.n + ' ' + fmt(+x.dose || 0, 0) + ' kg/ha' + (+x.kcl > 0 ? ' + KCl ' + fmt(+x.kcl, 0) : '') : (+x.kcl > 0 ? 'KCl ' + fmt(+x.kcl, 0) + ' kg/ha' : 'manual'); }
+  function relGroup(H, keyf){ var g = {}; H.forEach(function(x){ var k = keyf(x); if (k == null) return; (g[k] = g[k] || []).push(x); }); return Object.keys(g).map(function(k){ var L = g[k]; return { k: k, n: L.length, ha: L.reduce(function(a, x){ return a + x.area; }, 0), m: relWavg(L, function(x){ return x.real; }) }; }).sort(function(a, b){ return b.m - a.m; }); }
+  function renderRel(y){
+    var D = relData(y), H = D.H, fech = safraFechada(y), hoje = new Date();
+    var head = '<div class="rtools"><a href="#safras" class="sback"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>Safras</a>'
+      + (H.length ? '<button type="button" class="btn" id="relPrint">Salvar PDF</button>' : '') + '</div>'
+      + (H.length ? '<p class="cs rtip">No iPhone, o botão abre a tela de impressão: toque em Compartilhar (ou abra a prévia com dois dedos) e escolha Salvar em Arquivos.</p>' : '');
+    var h = '<div class="rdoc"><div class="rcover"><div class="rbrand"><span class="rlogo">' + glLogo(false) + '</span><span>Glycine Lab</span></div>'
+      + '<h1>Relatório ' + (fech ? 'final ' : '') + 'da safra ' + safraNome(y) + '</h1><div class="rsub">' + (fech ? 'Safra encerrada' : 'Prévia · safra ainda aberta') + ' · gerado em ' + pad(hoje.getDate()) + '/' + pad(hoje.getMonth() + 1) + '/' + hoje.getFullYear() + '</div></div>';
+    if (!H.length){ $('relBody').innerHTML = head + h + '<div class="rsec"><h2>Sem colheitas registradas</h2><p>O relatório aparece quando houver pelo menos um talhão com a colheita registrada.</p></div></div>'; return; }
+    var areaT = H.reduce(function(a, x){ return a + x.area; }, 0), prodT = H.reduce(function(a, x){ return a + x.real * x.area; }, 0), mR = relWavg(H, function(x){ return x.real; });
+    var potW = relWavg(H, function(x){ return x.pot; }), hp = H.filter(function(x){ return x.proj; });
+    var bias = hp.length ? hp.reduce(function(a, x){ return a + (x.real - x.proj) / x.proj; }, 0) / hp.length * 100 : null, mae = hp.length ? hp.reduce(function(a, x){ return a + Math.abs(x.real - x.proj) / x.proj; }, 0) / hp.length * 100 : null;
+    var fz = {}; H.forEach(function(x){ fz[x.faz] = 1; });
+    var Hc = H.filter(function(x){ return x.chuva != null; }), chM = Hc.length ? relWavg(Hc, function(x){ return x.chuva; }) : null;
+    // cultivares
+    var byV = {}; H.forEach(function(x){ (byV[x.vi] = byV[x.vi] || []).push(x); });
+    var envMed = (function(){ var e = H.filter(function(x){ return x.ret != null; }).map(function(x){ return x.ret; }).sort(function(a, b){ return a - b; }); return e.length ? e[Math.floor(e.length / 2)] : null; })();
+    var cycAll = H.filter(function(x){ return x.ciclo; }), cycM = cycAll.length ? cycAll.reduce(function(a, x){ return a + x.ciclo; }, 0) / cycAll.length : null;
+    var VV = Object.keys(byV).map(function(vi){
+      var L = byV[vi], v = L[0].v, m = relWavg(L, function(x){ return x.real; }), vals = L.map(function(x){ return x.real; }), mean = vals.reduce(function(a, b){ return a + b; }, 0) / vals.length;
+      var sd = vals.length > 1 ? Math.sqrt(vals.reduce(function(a, b){ return a + (b - mean) * (b - mean); }, 0) / (vals.length - 1)) : 0, cv = mean ? sd / mean * 100 : 0;
+      var cyc = L.filter(function(x){ return x.ciclo; }), cm = cyc.length ? cyc.reduce(function(a, x){ return a + x.ciclo; }, 0) / cyc.length : null;
+      var pops = L.filter(function(x){ return x.pop; }), pm = pops.length ? relWavg(pops, function(x){ return x.pop; }) : null;
+      var lossSum = {}; L.forEach(function(x){ Object.keys(x.perdas).forEach(function(k){ lossSum[k] = (lossSum[k] || 0) + x.perdas[k] * (x.area || 1); }); });
+      var lim = relTop(lossSum);
+      var lowE = L.filter(function(x){ return x.ret != null && envMed != null && x.ret < envMed; }), hiE = L.filter(function(x){ return x.ret != null && envMed != null && x.ret >= envMed; });
+      var resid = function(LL){ return LL.length ? LL.reduce(function(a, x){ return a + (x.real - mR); }, 0) / LL.length : null; };
+      return { vi: +vi, v: v, L: L, m: m, min: Math.min.apply(null, vals), max: Math.max.apply(null, vals), cv: cv, cm: cm, pm: pm, lim: lim, ha: L.reduce(function(a, x){ return a + x.area; }, 0),
+        pref: v.potRef ? m / v.potRef * 100 : null, rLow: resid(lowE), rHi: resid(hiE), nLow: lowE.length, nHi: hiE.length,
+        sys: relGroup(L, function(x){ return PREPARO[x.prep] ? PREPARO[x.prep].nome : null; }) };
+    }).sort(function(a, b){ return b.m - a.m; });
+    VV.forEach(function(o, i){
+      var f = [], w = [];
+      if (i === 0 && VV.length > 1) f.push('Maior produtividade da safra: ' + fmt(o.m - mR, 1) + ' sc/ha acima da média geral');
+      else if (o.m >= mR + 0.5) f.push('Acima da média da safra (+' + fmt(o.m - mR, 1) + ' sc/ha)');
+      if (o.pref != null && o.pref >= 100) f.push('Superou a referência de ensaio (' + fmt(o.pref, 0) + '% de ' + o.v.potRef + ' sc/ha)');
+      if (o.L.length >= 2 && o.cv < 8) f.push('Estável entre talhões (variação de ' + fmt(o.cv, 0) + '%)');
+      if (o.nLow && o.rLow != null && o.rLow > 0) f.push('Rústica: rendeu acima da média nos ambientes mais restritivos da safra');
+      if (o.nHi && o.rHi != null && o.rHi > 2 && !(o.nLow && o.rLow > 0)) f.push('Responsiva: aproveitou os ambientes mais favoráveis');
+      if (o.cm != null && cycM != null && VV.length > 1 && o.cm <= cycM - 5) f.push('Ciclo mais curto (' + fmt(o.cm, 0) + ' dias): libera a área antes para a safrinha');
+      if (o.sys.length > 1) f.push('Melhor em ' + o.sys[0].k.toLowerCase() + ' (' + fmt(o.sys[0].m, 1) + ' × ' + fmt(o.sys[o.sys.length - 1].m, 1) + ' sc/ha em ' + o.sys[o.sys.length - 1].k.toLowerCase() + ')');
+      if (o.pref != null && o.pref < 85) w.push('Ficou em ' + fmt(o.pref, 0) + '% da referência de ensaio');
+      if (o.lim) w.push('O que mais limitou: ' + o.lim);
+      if (o.L.length >= 3 && o.cv >= 15) w.push('Instável entre talhões (variação de ' + fmt(o.cv, 0) + '%)');
+      if (o.L.length < 2) w.push('Só um talhão: os pontos fortes ainda são indicativos');
+      o.f = f; o.w = w;
+    });
+    // destaques
+    var D2 = [], best = H.slice().sort(function(a, b){ return b.real - a.real; })[0], worst = H.slice().sort(function(a, b){ return a.real - b.real; })[0];
+    if (VV.length > 1) D2.push('<b>' + esc(VV[0].v.nome) + '</b> foi a cultivar de maior média (' + fmt(VV[0].m, 1) + ' sc/ha), ' + fmt(VV[0].m - VV[VV.length - 1].m, 1) + ' sc/ha acima de ' + esc(VV[VV.length - 1].v.nome) + '.');
+    D2.push('Melhor talhão: <b>' + esc(best.nome) + '</b> (' + esc(best.faz) + ', ' + esc(shortV(best.vi)) + '), ' + fmt(best.real, 1) + ' sc/ha.' + (H.length > 1 ? ' Menor: ' + esc(worst.nome) + ', ' + fmt(worst.real, 1) + ' sc/ha.' : ''));
+    var gS = relGroup(H, function(x){ return PREPARO[x.prep] ? PREPARO[x.prep].nome : null; });
+    if (gS.length > 1) D2.push(gS[0].k + ' rendeu ' + fmt(gS[0].m - gS[gS.length - 1].m, 1) + ' sc/ha a mais que ' + gS[gS.length - 1].k.toLowerCase() + ' (' + gS[0].n + ' × ' + gS[gS.length - 1].n + ' talhões).');
+    var lossAll = {}; H.forEach(function(x){ Object.keys(x.perdas).forEach(function(k){ lossAll[k] = (lossAll[k] || 0) + x.perdas[k] * (x.area || 1); }); });
+    var tl = relTop(lossAll); if (tl) D2.push('O fator que mais tirou produtividade na safra foi <b>' + tl + '</b> (cerca de ' + fmt(lossAll[tl] / areaT, 1) + ' sc/ha em média).');
+    var PL = H.filter(function(x){ return x.perdaV.length; }); if (PL.length) D2.push(PL.length + (PL.length === 1 ? ' talhão teve' : ' talhões tiveram') + ' perda de plantas registrada depois da emergência (' + PL.map(function(x){ return esc(x.nome) + ': ' + x.perdaV.map(function(p){ return fmt(p.pct, 0) + '% ' + p.causa.toLowerCase(); }).join(', '); }).join('; ') + ').');
+    if (bias != null) D2.push('O modelo ' + (Math.abs(bias) < 3 ? 'acertou na média (erro médio de ' + fmt(mae, 1) + '%)' : (bias > 0 ? 'subestimou' : 'superestimou') + ' a colheita em ' + fmt(Math.abs(bias), 1) + '% na média (erro médio de ' + fmt(mae, 1) + '%)') + '.');
+    h += '<div class="rsec"><h2>Resumo</h2><div class="rkpi">'
+      + '<div><b>' + fmt(mR, 1) + '</b><span>sc/ha colhidas (média ponderada)</span></div><div><b>' + fmt(prodT, 0) + '</b><span>sacas em ' + fmt(areaT, 1) + ' ha</span></div>'
+      + '<div><b>' + fmt(potW ? mR / potW * 100 : 0, 0) + '%</b><span>do potencial de referência</span></div><div><b>' + H.length + '/' + D.all.length + '</b><span>talhões colhidos · ' + Object.keys(fz).length + (Object.keys(fz).length === 1 ? ' fazenda' : ' fazendas') + '</span></div>'
+      + (chM != null ? '<div><b>' + fmt(chM, 0) + ' mm</b><span>chuva média no ciclo</span></div>' : '') + (mae != null ? '<div><b>' + fmt(mae, 1) + '%</b><span>erro médio do modelo</span></div>' : '')
+      + '</div><h3>Destaques</h3><ul>' + D2.map(function(s){ return '<li>' + s + '</li>'; }).join('') + '</ul></div>';
+    // gráfico das cultivares
+    var mx = Math.max.apply(null, VV.map(function(o){ return Math.max(o.m, o.v.potRef || 0); })) * 1.08, bh = 26, W = 640, lx = 150, H2 = VV.length * (bh + 14) + 28;
+    var svg = '<svg class="rchart" viewBox="0 0 ' + W + ' ' + H2 + '" role="img" aria-label="Produtividade colhida por cultivar comparada à referência de ensaio">'
+      + VV.map(function(o, i){ var yy = 10 + i * (bh + 14), bw = (o.m / mx) * (W - lx - 70), rx = o.v.potRef ? lx + (o.v.potRef / mx) * (W - lx - 70) : null;
+          return '<text x="' + (lx - 10) + '" y="' + (yy + bh / 2 + 5) + '" text-anchor="end" font-size="14" fill="#1f2a22">' + esc(shortV(o.vi)) + '</text>'
+            + '<rect x="' + lx + '" y="' + yy + '" width="' + bw.toFixed(1) + '" height="' + bh + '" rx="5" fill="#2f7a4a"/>'
+            + '<text x="' + (lx + bw + 8) + '" y="' + (yy + bh / 2 + 5) + '" font-size="14" font-weight="600" fill="#1f2a22">' + fmt(o.m, 1) + '</text>'
+            + (rx ? '<line x1="' + rx.toFixed(1) + '" x2="' + rx.toFixed(1) + '" y1="' + (yy - 3) + '" y2="' + (yy + bh + 3) + '" stroke="#b5642a" stroke-width="2.5" stroke-dasharray="4 3"/>' : ''); }).join('')
+      + '<text x="' + lx + '" y="' + (H2 - 4) + '" font-size="12" fill="#5f6b62">Barra: colhido (sc/ha) · Traço laranja: referência de ensaio da cultivar</text></svg>';
+    h += '<div class="rsec"><h2>Cultivares</h2>' + svg
+      + '<table class="rtab"><thead><tr><th>Cultivar</th><th>Talhões</th><th>ha</th><th>sc/ha</th><th>vs média</th><th>% ref.</th><th>Faixa</th><th>Ciclo</th><th>Estande</th></tr></thead><tbody>'
+      + VV.map(function(o){ return '<tr><td>' + esc(o.v.nome) + '</td><td>' + o.L.length + '</td><td>' + fmt(o.ha, 1) + '</td><td><b>' + fmt(o.m, 1) + '</b></td><td>' + (o.m - mR >= 0 ? '+' : '') + fmt(o.m - mR, 1) + '</td><td>' + (o.pref != null ? fmt(o.pref, 0) + '%' : '—') + '</td><td>' + (o.L.length > 1 ? fmt(o.min, 1) + '–' + fmt(o.max, 1) : '—') + '</td><td>' + (o.cm != null ? fmt(o.cm, 0) + ' d' : '—') + '</td><td>' + (o.pm != null ? fmt(o.pm, 0) + ' mil' : '—') + '</td></tr>'; }).join('')
+      + '</tbody></table>'
+      + VV.map(function(o){ return '<div class="rcv"><h3>' + esc(o.v.nome) + ' <span>' + fmt(o.m, 1) + ' sc/ha · ' + o.L.length + (o.L.length === 1 ? ' talhão' : ' talhões') + ' (' + o.L.map(function(x){ return esc(x.nome); }).join(', ') + ')</span></h3>'
+          + (o.f.length ? '<div class="rpf"><b>Pontos fortes</b><ul>' + o.f.map(function(s){ return '<li>' + s + '</li>'; }).join('') + '</ul></div>' : '')
+          + (o.w.length ? '<div class="rpw"><b>Atenção</b><ul>' + o.w.map(function(s){ return '<li>' + s + '</li>'; }).join('') + '</ul></div>' : '') + '</div>'; }).join('')
+      + '<p class="rnote">Ambiente restritivo ou favorável: talhões abaixo ou acima da mediana das condições estimadas pelo modelo (água, solo, nutrição, estande e época). Referência de ensaio: potencial da cultivar no banco do app.</p></div>';
+    // talhões
+    h += '<div class="rsec"><h2>Talhões: condições, manejo e resultado</h2><table class="rtab rsm"><thead><tr><th>Talhão</th><th>Cultivar</th><th>Sistema · palha</th><th>Adubação</th><th>Semeadura</th><th>Colheita</th><th>Estande</th><th>Chuva</th><th>Projetado</th><th>Colhido</th><th>Mais limitou</th></tr></thead><tbody>'
+      + D.all.slice().sort(function(a, b){ return String(a.faz).localeCompare(String(b.faz), 'pt-BR') || String(a.nome).localeCompare(String(b.nome), 'pt-BR'); }).map(function(x){
+          var df = x.real != null && x.proj ? (x.real - x.proj) / x.proj * 100 : null;
+          return '<tr><td><b>' + esc(x.nome) + '</b><br><span>' + esc(x.faz) + ' · ' + fmt(x.area, 1) + ' ha</span></td><td>' + esc(shortV(x.vi)) + '</td><td>' + esc(PREPARO[x.prep] ? PREPARO[x.prep].nome : '—') + '<br><span>' + fmt(x.palha, 1) + ' t/ha</span></td><td>' + esc(relAdub(x)) + '</td>'
+            + '<td>' + fdt(x.sowMs) + (x.sowB ? '–' + fdt(x.sowB) : '') + '</td><td>' + (x.harvMs ? fdt(x.harvMs) + '<br><span>' + x.ciclo + ' dias</span>' : '—') + '</td><td>' + (x.pop ? fmt(x.pop, 0) + ' mil' : '—') + (x.perdaV.length ? '<br><span>perda ' + x.perdaV.map(function(p){ return fmt(p.pct, 0) + '%'; }).join(' + ') + '</span>' : '') + '</td>'
+            + '<td>' + (x.chuva != null ? fmt(x.chuva, 0) + ' mm' : '—') + '</td><td>' + (x.proj != null ? fmt(x.proj, 1) : '—') + '</td><td>' + (x.real != null ? '<b>' + fmt(x.real, 1) + '</b>' + (df != null ? '<br><span>' + (df >= 0 ? '+' : '') + fmt(df, 0) + '%</span>' : '') : 'não colhido') + '</td><td>' + (relTop(x.perdas) || '—') + '</td></tr>'; }).join('')
+      + '</tbody></table>' + (H.some(function(x){ return x.obs; }) ? '<h3>Observações da colheita</h3><ul>' + H.filter(function(x){ return x.obs; }).map(function(x){ return '<li><b>' + esc(x.nome) + ':</b> ' + esc(x.obs) + '</li>'; }).join('') + '</ul>' : '') + '</div>';
+    // manejo e ambiente
+    var gBlock = function(t, g){ return g.length ? '<div class="rgrp"><h3>' + t + '</h3>' + g.map(function(o){ return '<div class="rgr"><span>' + esc(o.k) + '</span><span><b>' + fmt(o.m, 1) + '</b> sc/ha</span><span>' + o.n + (o.n === 1 ? ' talhão' : ' talhões') + ' · ' + fmt(o.ha, 1) + ' ha</span></div>'; }).join('') + '</div>' : ''; };
+    var gP = relGroup(H, function(x){ return x.palha < 4 ? 'Até 4 t/ha' : x.palha < 9 ? '4 a 9 t/ha' : 'Acima de 9 t/ha'; });
+    var gE = relGroup(H, function(x){ var d = new Date(x.sowMs), md = (d.getUTCMonth() + 1) * 100 + d.getUTCDate(); return md <= 1020 ? 'Até 20/10' : md <= 1110 ? '21/10 a 10/11' : 'Depois de 10/11'; });
+    var gC = relGroup(H.filter(function(x){ return x.chuva != null; }), function(x){ return x.chuva < 500 ? 'Menos de 500 mm' : x.chuva < 800 ? '500 a 800 mm' : '800 mm ou mais'; });
+    h += '<div class="rsec"><h2>Manejo e ambiente</h2><p class="rnote">Médias ponderadas pela área. Com poucos talhões, a diferença pode vir da cultivar ou do local, e não só do manejo.</p>'
+      + gBlock('Sistema de preparo', gS) + gBlock('Palhada na semeadura', gP) + gBlock('Época de semeadura', gE) + gBlock('Chuva no ciclo', gC) + '</div>';
+    // modelo x real
+    if (hp.length) h += '<div class="rsec"><h2>Modelo × colheita</h2><p>Projeção gravada antes da colheita comparada ao colhido. Erro médio de <b>' + fmt(mae, 1) + '%</b>; em média o colhido ficou ' + (bias >= 0 ? fmt(bias, 1) + '% acima' : fmt(-bias, 1) + '% abaixo') + ' da projeção.'
+      + (Math.abs(bias) >= 8 ? ' <b>Sugestão:</b> ' + (bias > 0 ? 'subir' : 'baixar') + ' o potencial de referência das cultivares em cerca de ' + fmt(Math.abs(bias), 0) + '% para a próxima safra, ou rever os fatores que mais pesaram.' : ' O modelo ficou bem calibrado para estas áreas.') + '</p></div>';
+    // próxima safra
+    var S = [];
+    if (VV.length > 1) S.push('Manter ou ampliar ' + esc(VV[0].v.nome) + (VV[0].f.some(function(s){ return s.indexOf('Rústica') === 0; }) ? ', inclusive nas áreas mais restritivas' : '') + '; reavaliar ' + esc(VV[VV.length - 1].v.nome) + ' antes de repetir em área grande.');
+    if (gS.length > 1 && gS[0].m - gS[gS.length - 1].m >= 3) S.push('O ' + gS[0].k.toLowerCase() + ' se destacou: vale repetir a comparação com a mesma cultivar nos dois sistemas para separar o efeito do manejo.');
+    if (tl === 'água') S.push('Água foi o maior limitante: priorizar palhada, semear cedo dentro da janela e escolher cultivares mais rústicas nas áreas de solo arenoso.');
+    if (tl === 'estande' || PL.length) S.push('Houve perdas de estande: conferir regulagem da semeadora, profundidade e controle de aves e pragas iniciais; contar o estande em VE-V2 para decidir replantio cedo.');
+    if (gE.length > 1 && gE[0].k !== 'Depois de 10/11') S.push('Semeaduras ' + gE[0].k.toLowerCase() + ' renderam mais (' + fmt(gE[0].m, 1) + ' sc/ha): planejar a ordem de plantio para cair nessa janela.');
+    S.push('Registrar a colheita de cada talhão separadamente e manter as visitas: cada safra deixa o banco de cultivares e o modelo mais precisos para as suas áreas.');
+    h += '<div class="rsec"><h2>Para a próxima safra</h2><ul>' + S.map(function(s){ return '<li>' + s + '</li>'; }).join('') + '</ul></div>';
+    h += '<div class="rsec rfoot"><p>Glycine Lab · relatório gerado a partir das colheitas registradas, das visitas e do clima (Open-Meteo e pluviômetro). Projeções e pontos fortes são estimativas do modelo do app e ficam mais confiáveis com mais talhões e safras. Uso pessoal, não comercial.</p></div></div>';
+    $('relBody').innerHTML = head + h;
+    var pb = $('relPrint'); if (pb) pb.addEventListener('click', function(){ document.title = 'Glycine Lab - Relatorio safra ' + safraNome(y).replace('/', '-'); window.print(); setTimeout(function(){ document.title = 'Glycine Lab'; }, 1500); });
+  }
   function safraIds(){
     var ys = {}; ys[2026] = 1; Object.keys(allT).forEach(function(k){ ys[tSafra(allT[k])] = 1; }); Object.keys(safras).forEach(function(k){ if (safras[k] && safras[k].ano) ys[+safras[k].ano] = 1; });
     return Object.keys(ys).map(Number).sort(function(a, b){ return b - a; });
@@ -2531,6 +2707,7 @@ function run(inp){
         + (ids.length ? '<span style="text-align:right"><b class="num" style="font-family:var(--font-display);font-size:20px;display:block">'+fmt(o.area ? o.prod / o.area : 0, 1)+'</b><span class="cs">sc/ha · '+fmt(ret, 0)+'%</span></span>' : '')+'</div>'
         + '<div class="cs">'+Object.keys(pj).length+(Object.keys(pj).length === 1 ? ' fazenda' : ' fazendas')+' · '+ids.length+(ids.length === 1 ? ' talhão' : ' talhões')+' · '+fmt(o.area, 0)+' ha'+(ids.length ? ' · '+fmt(o.prod, 0)+' sc projetadas' : '')+'</div>'
         + (nC.length ? '<div class="cs" style="color:var(--ink)"><b>Colhido: '+fmt(aC ? pC / aC : 0, 1)+' sc/ha</b> em '+nC.length+' de '+ids.length+(ids.length === 1 ? ' talhão' : ' talhões')+' ('+fmt(pC, 0)+' sc)</div>' : '')+'</a>'
+        + (nC.length ? '<a class="btn '+(fech ? '' : 'ghost')+' rbtn" href="#relatorio-'+y+'">'+(fech ? 'Gerar relatório final' : 'Gerar relatório (prévia: '+nC.length+' de '+ids.length+' colhidos)')+'</a>' : '')
         + (ids.length ? '<div class="sfoot">'+(fech ? '<button type="button" class="btn ghost" data-reopen="'+y+'">Reabrir safra</button>' : '<button type="button" class="btn ghost" data-close="'+y+'">'+(nC.length < ids.length ? 'Encerrar safra ('+(ids.length - nC.length)+' sem colheita)' : 'Encerrar safra')+'</button>')+'</div>' : '')
         + '</div>';
     }).join('');
@@ -3099,8 +3276,47 @@ function run(inp){
   $('fVCancel').addEventListener('click', closeVisit);
   $('dlgV').addEventListener('click', function(e){ if (e.target === $('dlgV')) closeVisit(); });
   $('openVisit').addEventListener('click', openVisit);
+  $('openPerda').addEventListener('click', function(){ openVisit(); setTimeout(function(){ var f = $('fVPerda'); f.closest('fieldset').scrollIntoView({ block: 'center' }); f.focus(); }, 60); });
+
+  // Histórico de visitas: uma ficha por visita, com data, dias desde a semeadura, estádio e todos os parâmetros registrados.
+  function visitRows(t, v, asc, sow){
+    var i = asc.indexOf(v), a = i > 0 ? isoToMs(asc[i-1].d) : sow, n = Math.max(1, Math.round((isoToMs(v.d) - a)/864e5)), R = [];
+    R.push(['Chuva', v.chuva == null || v.chuva === '' ? 'da Open-Meteo' : fmt(+v.chuva || 0)+' mm em '+n+(n === 1 ? ' dia' : ' dias')+(i > 0 ? ' (desde '+fdt(a)+')' : ' (desde a semeadura)')]);
+    if (v.tmax != null && v.tmax !== '') R.push(['Temp. máxima', fmt(+v.tmax, 1)+' °C']);
+    if (+v.clima) R.push(['Clima', OPTS.clima[+v.clima]]);
+    if (v.st != null) R.push(['Estádio', STAGES[v.st].k+' (observado)']);
+    if (v.pop != null) R.push(['Estande', fmt(v.pop)+' mil pl/ha'+(v.pm != null ? ' · '+fmt(v.pm,1)+' pl/m a '+fmt(v.esp)+' cm' : '')]);
+    if (v.fal != null) R.push(['Falhas na linha', fmt(v.fal)+'%']);
+    if (+v.perda > 0) R.push(['Perda de plantas', fmt(v.perda)+'%'+(v.causa != null ? ' · '+CAUSAS[v.causa]+(v.dist ? ' · em reboleiras' : ' · espalhada') : '')]);
+    if (+v.fito > 0) R.push(['Fitotoxicidade', FITO_N[v.fito].split(':')[0]+(v.fitoP != null ? ' · '+FITO_P[v.fitoP] : '')]);
+    R.push(['Plantas daninhas', OPTS.weed[+v.weed || 0]]);
+    if (v.obs) R.push(['Observação', v.obs]);
+    return R;
+  }
+  function renderHist(){
+    var t = talhoes[curId]; if (!t) return;
+    var sib = siblings(curId), withNb = $('hNb').checked && sib.length, ids = [curId].concat(withNb ? sib : []), L = [];
+    $('hNbL').hidden = !sib.length;
+    ids.forEach(function(id){ var u = talhoes[id], inp = Object.assign({}, DEF, u.inputs), sow = DAY0 + sowRng(inp)[0]*864e5, asc = (u.visitas || []).slice().sort(function(x, y){ return isoToMs(x.d) - isoToMs(y.d); });
+      asc.forEach(function(v, i){ L.push({ id: id, t: u, v: v, sow: sow, asc: asc, n: i + 1 }); }); });
+    L.sort(function(a, b){ return isoToMs(b.v.d) - isoToMs(a.v.d) || String(a.t.nome).localeCompare(String(b.t.nome)); });
+    $('hTitle').textContent = 'Histórico de visitas · ' + t.nome;
+    var nV = (t.visitas || []).length;
+    $('hSum').textContent = nV ? nV + (nV === 1 ? ' visita' : ' visitas') + ' neste talhão' + (withNb ? ', mais ' + (L.length - nV) + ' dos vizinhos' : '') + '. A mais recente primeiro.' : 'Nenhuma visita registrada ainda.';
+    var WD = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+    $('hList').innerHTML = L.map(function(o){
+      var ms = isoToMs(o.v.d), das = Math.round((ms - o.sow)/864e5), rows = visitRows(o.t, o.v, o.asc, o.sow);
+      return '<article class="hcard"><div class="hct"><b>'+fdt(ms)+'</b> <span>'+WD[new Date(ms).getUTCDay()]+' · visita '+o.n+' · '+(das >= 0 ? das+' dias após a semeadura' : (-das)+' dias antes da semeadura')+'</span>'+(withNb ? '<em>'+esc(o.t.nome)+'</em>' : '')+'</div>'
+        + '<dl>'+rows.map(function(r){ return '<dt>'+r[0]+'</dt><dd>'+esc(String(r[1]))+'</dd>'; }).join('')+'</dl></article>';
+    }).join('') || '<p class="cmeta">Use "Registrar visita" na tela do talhão.</p>';
+  }
+  $('openHist').addEventListener('click', function(){ $('hNb').checked = false; renderHist(); $('dlgHist').hidden = false; $('hList').scrollTop = 0; });
+  $('hNb').addEventListener('change', renderHist);
+  $('hClose').addEventListener('click', function(){ $('dlgHist').hidden = true; });
+  $('dlgHist').addEventListener('click', function(e){ if (e.target === $('dlgHist')) $('dlgHist').hidden = true; });
   function renderVisits(){
     var t = talhoes[curId]; if (!t) return;
+    var nv = (t.visitas || []).length; $('openHist').textContent = 'Histórico de visitas' + (nv ? ' (' + nv + ')' : '');
     var vs = (t.visitas || []).slice().sort(function(x, y){ return isoToMs(y.d) - isoToMs(x.d); });
     var sow = DAY0 + (t.inputs.sow || 0)*864e5, asc = (t.visitas || []).slice().sort(function(x, y){ return isoToMs(x.d) - isoToMs(y.d); });
     $('visList').innerHTML = vs.length ? vs.map(function(v){
